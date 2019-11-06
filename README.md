@@ -9,6 +9,7 @@ Main feature is classifying given picture whether it is dog or cat, by trained m
 - 14109359 Yuchan Lee (dldbcks95@gmail.com)
 
 ### Environment
+#### Local (docker-compose)
 - Database: PostgreSQL
 - Resource API Server: Django (http://localhost:8000)
     - Primary URLs: /admin, /api
@@ -17,6 +18,10 @@ Main feature is classifying given picture whether it is dog or cat, by trained m
 - Web Server: Nginx (http://localhost:80)
     - Primary URLs: /static, /media
     - URLs above will also be handled here with proxy
+
+#### Staging & Production (k8s)
+- RESERVED
+
 
 ## Installation
 
