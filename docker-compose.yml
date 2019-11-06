@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.7'
 
 x-common-variables: &system-network
   # django
@@ -17,6 +17,7 @@ networks:
 
 services: 
   postgres:
+    container_name: tal-postgres
     image: postgres:11.5-alpine
     environment:
       POSTGRES_DB: wsp
@@ -32,8 +33,9 @@ services:
     restart: on-failure:5
 
   django:
+    container_name: tal-django
     build: ./django
-    image: wsp-django
+    image: wsp-django:latest
     depends_on: 
       - postgres
     environment:
@@ -56,8 +58,9 @@ services:
     restart: on-failure:5
 
   tomcat:
+    container_name: tal-tomcat
     build: ./tomcat
-    image: wsp-tomcat
+    image: wsp-tomcat:latest
     volumes:
       - ./logs/tomcat:/usr/local/tomcat/logs
       - ./tomcat/conf:/usr/local/tomcat/conf
@@ -71,6 +74,7 @@ services:
     restart: on-failure:5
 
   nginx:
+    container_name: tal-nginx
     image: nginx:1.17-alpine
     depends_on:
       - django
