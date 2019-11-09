@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: takealook
+  name: deployment-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+      spec:
+        containers:
+        - name: container-postgres
+          image: postgres:11.5-alpine
+          ports:
+          - containerPort: 5432
+          env:
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: secret
+                key: backend.postgres.db
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: secret
+                key: backend.postgres.user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret
+                key: backend.postgres.password
