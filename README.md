@@ -1,8 +1,7 @@
 # Take a Look
-
-## Introduction
 This is a term project of 2019-fall SNUST Web Server Programming.
 
+## Introduction
 Main feature is classifying given picture whether it is dog or cat, by trained model with Kaggle dataset: [Dogs vs Cats (2013)](https://www.kaggle.com/c/dogs-vs-cats).
 
 ### Teams
@@ -38,5 +37,6 @@ Main feature is classifying given picture whether it is dog or cat, by trained m
 ```
 path/to/project/root> docker-compose up -d --build
 ```
+
 6. Wait until build processes are done
 7. When done, go to the browser and access http://localhost:80 and browse.
