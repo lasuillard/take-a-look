@@ -1,6 +1,5 @@
 server {
-  listen ${NGINX_PORT};
-  server_name ${NGINX_HOST};
+  listen 80;
   charset utf-8;
 
   access_log /var/log/nginx/access.log;
@@ -9,17 +8,19 @@ server {
   location / {
     proxy_pass http://${TOMCAT_HOST}:${TOMCAT_PORT};
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
   }
 
   location /admin/ {
     proxy_pass http://${DJANGO_HOST}:${DJANGO_PORT};
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
   }
 
   location /static/ {
-    alias /var/www/wsp/static/;
+    alias /var/www/takealook/static/;
   }
 
 }

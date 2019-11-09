@@ -1,0 +1,75 @@
+# for local
+version: '3.7'
+
+volumes:
+  postgres: {}
+
+networks:
+  local:
+    driver: bridge
+
+services: 
+  postgres:
+    image: postgres:11.5-alpine
+    environment:
+      POSTGRES_DB: wsp
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - local
+    ports:
+      - "5432:5432"
+    restart: on-failure:3
+
+  django:
+    build: ./django
+    image: takealook-django:local
+    depends_on: 
+      - postgres
+    environment:
+      DJANGO_SETTINGS_MODULE: core.settings
+      DJANGO_SECRET_KEY: _a_secret_key_
+      DJANGO_DEBUG: 1
+      DATABASE_URL: postgres://user:1234@postgres:5432/wsp
+    volumes:
+      - ./django:/django
+    networks:
+      - local
+    ports:
+      - "8000:8000"
+    restart: on-failure:5
+
+  tomcat:
+    build: ./tomcat
+    image: takealook-tomcat:local
+    volumes:
+      - ./logs/tomcat:/usr/local/tomcat/logs
+    networks:
+      - local
+    ports:
+      - "8080:8080"
+    restart: on-failure:3
+
+  nginx:
+    build: ./nginx
+    image: takealook-nginx:local
+    depends_on:
+      - django
+      - tomcat
+    environment:
+      DJANGO_HOST: django
+      DJANGO_PORT: 8000
+      TOMCAT_HOST: tomcat
+      TOMCAT_PORT: 8080
+    volumes:
+      - ./django/staticfiles:/var/www/takealook/static
+      - ./logs/nginx:/var/log/nginx
+    networks:
+      - local
+    ports:
+      - "80:80"
+    restart: on-failure:10
+  
