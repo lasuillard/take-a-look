@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: takealook
+  name: deployment-main-blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: main
+      color: blue
+  template:
+    metadata:
+      namespace: takealook
+      labels:
+        app: main
+        color: blue
+    spec:
+      volumes:
+        - name: http-static
+          emptyDir: {}
+      containers:
+        # container image tags will(should) be handled via environment variables with CI/CD (GitLab in considerations)
+        - name: container-nginx
+          image: takealook.azurecr.io/gateway-nginx:init
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: http-static
+              mountPath: /var/www/http/static
+          env:
+            - name: DJANGO_HOST
+              valueFrom: 
+                configMapKeyRef:
+                  name: config
+                  key: backend.django.host
+            - name: DJANGO_PORT
+              valueFrom: 
+                configMapKeyRef:
+                  name: config
+                  key: backend.django.port
+            - name: TOMCAT_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: frontend.tomcat.host
+            - name: TOMCAT_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: frontend.tomcat.port
+        - name: container-django
+          image: takealook.azurecr.io/backend-django:init-1
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: http-static
+              mountPath: /django/staticfiles
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: backend.django.setting
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: backend.django.secret
+            - name: DATABASE_URL
+              valueFrom:  
+                secretKeyRef:
+                  name: secret
+                  key: backend.django.database.url
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "python manage.py collectstatic --no-input"]
+        - name: container-tomcat
+          image: takealook.azurecr.io/frontend-tomcat:init
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          ports:
+            - containerPort: 8080

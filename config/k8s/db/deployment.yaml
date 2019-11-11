@@ -10,10 +10,11 @@ spec:
       app: db
   template:
     metadata:
+      namespace: takealook
       labels:
         app: db
-      spec:
-        containers:
+    spec:
+      containers:
         - name: container-postgres
           image: postgres:11.5-alpine
           ports:
@@ -34,3 +35,7 @@ spec:
               secretKeyRef:
                 name: secret
                 key: backend.postgres.password
+          resources:
+            limits:
+              cpu: 700m
+              memory: 512Mi

@@ -7,7 +7,8 @@ spec:
   type: LoadBalancer
   selector:
     app: main
-    color: green
+    color: blue
   ports:
   - port: 80
     targetPort: 80
+    protocol: TCP

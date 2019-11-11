@@ -6,8 +6,8 @@ metadata:
 data:
   project.id: "take-a-look"
   project.name: "Take a Look"
-  # network configurations; related with system structure
   backend.django.host: "localhost"
   backend.django.port: "8000"
+  backend.django.setting: "core.settings"
   frontend.tomcat.host: "localhost"
   frontend.tomcat.port: "8080"
