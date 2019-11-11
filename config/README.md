@@ -4,8 +4,8 @@ This directory includes various settings for projects, mainly k8s.
 ## Kubernetes
 This project uses blue/green deployment pattern, and followings are important metadatas:
 
+* Naming convetion: { resource-type(shortname if possible) }-{ resource-name }-{ suffix }
 * Namespace: takealook
-* Naming convetion: { resource-type }-{ resource-name }-{ suffix }
 * Apps: main, db
 * Labels: env, app
 

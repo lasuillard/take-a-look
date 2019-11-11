@@ -1,5 +1,5 @@
 export ACR_RES_GROUP=takealook-acr
-export ACR_REPOSITORY_NAME=takealook-acr-repo
+export ACR_REPOSITORY_NAME=takealook
 export SP_NAME=takealook-sp
 export AKS_RES_GROUP=takealook-aks
 export AKS_CLUSTER_NAME=takealook-aks-cluster

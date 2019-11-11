@@ -20,7 +20,11 @@ server {
   }
 
   location /static/ {
-    alias /var/www/takealook/static/;
+    alias /var/www/http/static/;
+  }
+
+  location /media/ {
+    alias /var/www/http/media/;
   }
 
 }
