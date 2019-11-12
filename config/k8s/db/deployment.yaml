@@ -21,20 +21,11 @@ spec:
           - containerPort: 5432
           env:
           - name: POSTGRES_DB
-            valueFrom:
-              secretKeyRef:
-                name: secret
-                key: backend.postgres.db
+            value: takealook
           - name: POSTGRES_USER
-            valueFrom:
-              secretKeyRef:
-                name: secret
-                key: backend.postgres.user
+            value: tal
           - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: secret
-                key: backend.postgres.password
+            value: g7152fa
           resources:
             limits:
               cpu: 700m

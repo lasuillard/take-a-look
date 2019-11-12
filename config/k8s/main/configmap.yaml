@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: takealook
+  name: config-gateway
+data:
+  DJANGO_HOST: "localhost"
+  DJANGO_PORT: "8000"
+  TOMCAT_HOST: "localhost"
+  TOMCAT_PORT: "8080"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: takealook
+  name: config-backend
+data:
+  DJANGO_SETTINGS_MODULE: "core.settings"
