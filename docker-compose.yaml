@@ -25,7 +25,9 @@ services:
     restart: on-failure:3
 
   django:
-    build: ./django
+    build: 
+      context: ./django
+      dockerfile: Dockerfile.local
     image: takealook-django:local
     depends_on: 
       - postgres
@@ -36,6 +38,7 @@ services:
       DATABASE_URL: postgres://user:1234@postgres:5432/wsp
     volumes:
       - ./django:/django
+      - ./logs/django:/django/logs
     networks:
       - local
     ports:
@@ -43,9 +46,12 @@ services:
     restart: on-failure:5
 
   tomcat:
-    build: ./tomcat
+    build:
+      context: ./tomcat
+      dockerfile: Dockerfile.local
     image: takealook-tomcat:local
     volumes:
+      - ./tomcat:/usr/local/tomcat
       - ./logs/tomcat:/usr/local/tomcat/logs
     networks:
       - local
@@ -54,7 +60,9 @@ services:
     restart: on-failure:3
 
   nginx:
-    build: ./nginx
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile.local
     image: takealook-nginx:local
     depends_on:
       - django
@@ -65,7 +73,7 @@ services:
       TOMCAT_HOST: tomcat
       TOMCAT_PORT: 8080
     volumes:
-      - ./django/staticfiles:/var/www/takealook/static
+      - ./django/staticfiles:/var/www/http/static
       - ./logs/nginx:/var/log/nginx
     networks:
       - local

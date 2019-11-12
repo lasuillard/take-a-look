@@ -7,20 +7,18 @@ RUN apt update && \
 # python buffer off
 ENV PYTHONUNBUFFERED 0
 
-# install pip dependencies
+# install pip dependencies; project files will be shared via volume
 WORKDIR /django
-COPY . .
+COPY requirements.txt .
 RUN pip install -r requirements.txt --default-timeout=100
 
 # download helper shell script
 ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /
 RUN ["chmod", "u+x", "/wait-for-it.sh"]
 
-# collect statics and update database
-ONBUILD RUN python manage.py collectstatic --no-input && \
-            python manage.py makemigrations
-
-# TODO: migrations should be performed only one time for all pods
-CMD /wait-for-it.sh svc-db:5432 -t 10 && \
+# migrate db and run server
+CMD python manage.py collectstatic --no-input && \
+    /wait-for-it.sh postgres:5432 -t 10 && \
+    python manage.py makemigrations && \
     python manage.py migrate && \
     gunicorn --bind 0.0.0.0:8000 core.wsgi
