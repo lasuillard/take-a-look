@@ -1,23 +1,43 @@
 """ /functional_test.py
     integration testing for overall system
+
+    this mainly tests hypermedia behaviors for user (front-end)
 """
 import pytest
+import urllib.parse
 from selenium import webdriver
 
 
-@pytest.mark.django_db(transaction=True)
-class IndexPageTest:
+@pytest.fixture(scope='module')
+def browser():
+    browser = webdriver.Chrome('C:/Tools/chromedriver.exe')
+    yield browser
+    browser.quit()
+
+
+class WebBrowser:
+    """
+    helper class for functional tests with selenium webdriver
+    """
     server_url = 'http://localhost:80'
 
-    @classmethod
-    def setup_class(cls):
-        cls.browser = webdriver.Chrome('C:/Tools/chromedriver.exe')
-        cls.browser.implicitly_wait(5.0)
+    def get(self, browser, url):
+        return browser.get(urllib.parse.urljoin(self.server_url, url))
 
-    @classmethod
-    def teardown_class(cls):
-        cls.browser.quit()
 
-    def test_page_served_well(self):
-        self.browser.get(f'{self.server_url}/')
-        assert 'Tomcat' in self.browser.title
+class IndexPageTest(WebBrowser):
+    """
+    tests for /
+    """
+    def test_page_served_well(self, browser):
+        self.get(browser, '/')
+        assert 'Take a Look' in browser.title
+
+
+class HistoryPageTest(WebBrowser):
+    """
+
+    """
+    def test_page_served_well(self, browser):
+        self.get(browser, '/history')
+        assert 'Take a Look' in browser.title

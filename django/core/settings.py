@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # add-ons
     'corsheaders',
+    'rest_framework',
     # apps
     'core',
 ]
@@ -95,6 +96,11 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-CORS_ORIGIN_WHITELIST = [
-    'http://{}:{}'.format(os.environ.get('TOMCAT_HOST', 'localhost'), os.environ.get('TOMCAT_PORT', 8080))
-]
+CORS_ORIGIN_ALLOW_ALL = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer'
+    ],
+}
