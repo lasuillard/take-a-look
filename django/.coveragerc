@@ -3,4 +3,5 @@ source = .
 omit = manage.py
        *__init__*
        *migrations*
-       venv/*  
+       venv/*
+       *test*
