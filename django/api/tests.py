@@ -2,10 +2,11 @@
     perform server-level isolated(using pytest-django live_server fixture) tests
 """
 import pytest
-from rest_framework.test import APIClient
 from rest_framework import status
+from rest_framework.test import APIClient
 
 
+@pytest.mark.unit
 class HCTest:
     """
     tests views for health-check
