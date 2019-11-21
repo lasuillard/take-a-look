@@ -2,13 +2,25 @@
     integration testing for overall system
 
     this mainly tests hypermedia behaviors for user (front-end)
+
+    points to think about:
+    - for testing <a>, or link, will it be just appropriate?
+    - vue/vuetify components are not directly accessible via id; better way for doing this?
 """
 import os
 import re
+import time
 import pytest
-from urllib.parse import urljoin, urlparse
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from test_helper import (
+    BrowserTestHelper,
+    check_url_pattern,
+    find_element_by_css_selector, find_elements_by_css_selector
+)
 
 
 @pytest.fixture(scope='session')
@@ -17,49 +29,6 @@ def browser():
     browser.implicitly_wait(1)
     yield browser
     browser.quit()
-
-
-@pytest.mark.functional
-class BrowserTestHelper:
-    """
-    helper class for functional tests with selenium webdriver
-    """
-    fixtures_to_use = ('browser', )
-    server_url = 'http://localhost:80'
-
-    @pytest.fixture(autouse=True)
-    def _auto_inject_fixtures(self, request):
-        """
-        this injects fixtures defined in 'fixtures_to_use' attribute into class instance attribute
-        """
-        names = self.fixtures_to_use
-        for name in names:
-            setattr(self, name, request.getfixturevalue(name))
-
-    @staticmethod
-    def is_url_pattern_matches(url, pattern):
-        """
-        receive absolute or relative url, and 'path' part will be compared to regex pattern
-        """
-        if isinstance(pattern, str):
-            p = re.compile(pattern)
-        elif isinstance(pattern, re.Pattern):
-            p = pattern
-        else:
-            raise TypeError('Expected type (str, re.Pattern) but received: {}'.format(type(pattern)))
-
-        return p.match(urlparse(url).path) is not None
-
-    def get(self, url):
-        return self.browser.get(urljoin(self.server_url, url))
-
-    def find_element_by_id(self, eid, default=None):
-        try:
-            element = self.browser.find_element_by_id(eid)
-        except NoSuchElementException:
-            return default
-        else:
-            return element
 
 
 # ==================================================================================================================== #
@@ -80,81 +49,83 @@ class IndexPageTest(BrowserTestHelper):
     def test_bottom_navigation_bar_works_well(self):
         # user look layouts, especially our simple & fancy bottom bar
         self.get(self.page_url)
-        navbar = self.find_element_by_id('bottom-navbar')
+        navbar = find_element_by_css_selector(self.browser, '#bottom-navbar')
         assert navbar is not None, 'Navigation bar is not found; did you forget?'
 
         # using 'navbar' instead of 'self.browser' to make sure that link is child of navbar
-        # is navbar has index(home) link?
-        link_to_home = navbar.find_element_by_id('navbar-link-home')
-        assert self.is_url_pattern_matches(link_to_home.get_attribute('href'), '^/$')
-
-        # is navbar has link to history?
-        link_to_history = navbar.find_element_by_id('navbar-link-history')
-        assert self.is_url_pattern_matches(link_to_history.get_attribute('href'), '^/history/$')
-
-        # is navbar has link to model list?
-        link_to_model = navbar.find_element_by_id('navbar-link-model')
-        assert self.is_url_pattern_matches(link_to_model.get_attribute('href'), '^/model/$')
+        for (selector, url_pattern) in [('#navbar-link-home', '^/$'),
+                                        ('#navbar-link-history', '^/history$'),
+                                        ('#navbar-link-model', '^/model$')]:
+            link = find_element_by_css_selector(navbar, selector)
+            href = link.get_attribute('href')
+            assert check_url_pattern(href, url_pattern)
 
     def test_user_enjoy_image_carousel(self):
         # user find image carousel
         self.get(self.page_url)
-        carousel = self.find_element_by_id('recent-submits')
+        carousel = find_element_by_css_selector(self.browser, '#recent-submits')
         assert carousel is not None, 'Carousel is not visible'
 
         # when user clicks image, then will be moved to its page (new state)
         # the selenium tester decided to pick one what it see
-        links = carousel.find_elements_by_tag_name('a')
-        pattern = re.compile(r'^/history/\d+/$')
+        links = find_elements_by_css_selector(carousel, 'a')
         for link in links:
-            assert self.is_url_pattern_matches(link.get_attribute('href'), pattern)
+            assert check_url_pattern(link.get_attribute('href'), r'^/history/\d+$')
 
     def test_simple_descriptions_of_models_provided(self):
         # finally user arrived at our models's preview
         # it is some kind of drawer component, or accordion, or something like that
         self.get(self.page_url)
-        preview = self.browser.find_element_by_id('model-previews')
+        preview = find_element_by_css_selector(self.browser, '#model-previews')
         assert preview is not None, 'Preview for models is not found'
 
-        # web will introduce them to model's detail description page by clicking its link
-        # and our tester will just pick first one
-        try:
-            model = preview.find_element_by_id('model-1')
-        except NoSuchElementException:
-            assert False, 'No models shown; is database or API alright?'
+        # our selenium tester will test all models in the container
+        # then first collect all model ids
+        models = [model.get_attribute('id')
+                  for model
+                  in find_elements_by_css_selector(preview, '.v-expansion-panel')]
+        assert None not in models, 'All items in model preview must have id for identification'
 
-        model.click()  # open accordion or collapsed
-        try:
-            link = model.find_element_by_id('model-1-link')
-        except NoSuchElementException:
-            assert False, 'No link found for model content; may view template or test malformed'
-
-        assert self.is_url_pattern_matches(link.get_attribute('href'), re.compile(r'^/model/\w+/$'))
+        # click and check href one by one
+        for eid in models:
+            model = find_element_by_css_selector(self.browser, f'#{eid}')
+            btn = find_element_by_css_selector(model, 'button')
+            _ = btn.location_once_scrolled_into_view  # scroll to model
+            btn.click()
+            link = WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a')))
+            assert link is not None, \
+                'No link in this model: {}; did you forget?'.format(model.get_attribute('id'))
+            assert check_url_pattern(link.get_attribute('href'), r'^/model/\w+$')
 
 
 class HistoryPageTest(BrowserTestHelper):
     """
-    tests for /history/, user submitted image list page
+    tests for /history, user submitted image list page
     """
-    page_url = '/history/'
+    page_url = '/history'
 
-    def test_user_browse_images(self):
-        # user get to history page to look around some kitty images, for time killing or whatever
+    def test_page_served_well(self):
         self.get(self.page_url)
         assert 'Take a Look' in self.browser.title
 
-        #
+    def test_user_browse_images(self):
+        # user get to history page to look around some kitty images, for time killing or whatever
+        # and find the image container
+        self.get(self.page_url)
+        container = find_element_by_css_selector(self.browser, '#image-container')
+        assert container is not None
 
+        # and pick first one, and it is linked to its detail page!
         assert False, 'Test is not done'
 
 
 class HistoryDetailPageTest(BrowserTestHelper):
     """
-    tests for /history/:id/, user submitted image detail with specific informations about it
+    tests for /history/:id, user submitted image detail with specific informations about it
     """
     @staticmethod
-    def page_url(item):  # /history/:item/
-        return f'/history/{item}/'
+    def page_url(item):  # /history/:item
+        return f'/history/{item}'
 
     def test_(self):
         pass
@@ -162,9 +133,9 @@ class HistoryDetailPageTest(BrowserTestHelper):
 
 class ModelPageTest(BrowserTestHelper):
     """
-    tests for /model/, list of machine learning models supported by server will be shown
+    tests for /model, list of machine learning models supported by server will be shown
     """
-    page_url = '/model/'
+    page_url = '/model'
 
     def test_page_well_served(self):
         self.get(self.page_url)
@@ -178,7 +149,7 @@ class ModelDetailPageTest(BrowserTestHelper):
     """
     @staticmethod
     def page_url(name):
-        return f'/model/{name}/'
+        return f'/model/{name}'
 
     def test_(self):
         pass
