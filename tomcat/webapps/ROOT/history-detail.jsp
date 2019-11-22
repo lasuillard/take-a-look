@@ -1,10 +1,10 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%> 
 <!DOCTYPE html>
 <html>
   <head>
     <%@ include file="/WEB-INF/jsp/static.jsp" %>
     <%@ include file="/WEB-INF/jsp/meta.jsp" %>
-    <title>Take a Look &mdash; Model</title>
+    <title>Take a Look &mdash; History</title>
   </head>
   <body>
     <v-app id="app">
@@ -20,7 +20,7 @@
       vuetify: new Vuetify(),
       data: () => ({
         meta: {
-          context: 'model'
+          context: 'history'
         },
       }),
     })

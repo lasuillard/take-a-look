@@ -69,22 +69,7 @@
           </v-row>
           <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
         </v-content>
-        <v-bottom-navigation app id="bottom-navbar" value="index">
-          <v-layout class="justify-space-around">
-            <v-btn id="navbar-link-home" value="index" href="/">
-              <span>Home</span>
-              <v-icon>mdi-home</v-icon>
-            </v-btn>
-            <v-btn id="navbar-link-history" value="history" href="/history">
-              <span>History</span>
-              <v-icon>mdi-view-dashboard</v-icon>
-            </v-btn>
-            <v-btn id="navbar-link-model" value="model" href="/model">
-              <span>Model</span>
-              <v-icon>mdi-robot</v-icon>
-            </v-btn>
-          </v-layout>
-        </v-bottom-navigation>
+        <%@ include file="/WEB-INF/jsp/components/bottom-nav-bar.jsp" %>
       </v-app>
     </div>
   </body>
@@ -93,7 +78,6 @@
       el: '#app',
       vuetify: new Vuetify(),
       data: () => ({
-        ping: '-',
         meta: {
           context: 'index'
         },

@@ -4,7 +4,7 @@
   <head>
     <%@ include file="/WEB-INF/jsp/static.jsp" %>
     <%@ include file="/WEB-INF/jsp/meta.jsp" %>
-    <title>Take a Look &mdash; Model</title>
+    <title>Take a Look &mdash; Predict</title>
   </head>
   <body>
     <v-app id="app">
@@ -20,7 +20,7 @@
       vuetify: new Vuetify(),
       data: () => ({
         meta: {
-          context: 'model'
+          context: 'predict'
         },
       }),
     })

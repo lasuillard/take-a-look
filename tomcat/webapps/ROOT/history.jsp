@@ -7,6 +7,22 @@
     <title>Take a Look &mdash; History</title>
   </head>
   <body>
+    <v-app id="app">
+      <v-content>
 
+      </v-content>
+      <%@ include file="/WEB-INF/jsp/components/bottom-nav-bar.jsp" %>
+    </v-app>
   </body>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data: () => ({
+        meta: {
+          context: 'history'
+        },
+      }),
+    })
+  </script>
 </html>
