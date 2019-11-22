@@ -1,0 +1,35 @@
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                      http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+  version="3.1"
+  metadata-complete="true">
+
+  <display-name>Main Application</display-name>
+  <description>
+    Project "Take a Look", Web Server Programming, 2019, SNUST
+  </description>
+
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <servlet>
+    <servlet-name>history-jsp</servlet-name>
+    <jsp-file>/history.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>history-jsp</servlet-name>
+    <url-pattern>/history</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>model-jsp</servlet-name>
+    <jsp-file>/model.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>model-jsp</servlet-name>
+    <url-pattern>/model</url-pattern>
+  </servlet-mapping>
+
+</web-app>
