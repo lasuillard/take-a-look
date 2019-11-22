@@ -78,11 +78,16 @@ class PageTestBase:
 
 class PageLayoutTestMixin(PageTestBase):
 
-    def test_bottom_navigation_bar_works_well(self):
+    def test_page_well_served(self):
+        # user visit main page and find 'Take a Look' in title
+        self.get(self.page_url() if callable(self.page_url) else self.page_url)
+        assert 'Take a Look' in self.browser.title
+
+    def test_bottom_navbar_works_well(self):
         # user look layouts, especially our simple & fancy bottom bar
         self.get(self.page_url() if callable(self.page_url) else self.page_url)
         navbar = find_element(self.browser, '#bottom-navbar')
-        assert navbar is not None, 'Navigation bar is not found; did you forget?'
+        assert navbar is not None
 
         # using 'navbar' instead of 'self.browser' to make sure that link is child of navbar
         for (selector, url_pattern) in [('#navbar-link-home', IndexPageTest.pattern),
@@ -102,16 +107,11 @@ class IndexPageTest(PageLayoutTestMixin):
     page_url = '/'
     pattern = re.compile(r'^/$')
 
-    def test_page_well_served(self):
-        # user visit main page and find 'Take a Look' in title
-        self.get(self.page_url)
-        assert 'Take a Look' in self.browser.title
-
     def test_user_enjoy_image_carousel(self):
         # user find image carousel
         self.get(self.page_url)
         carousel = find_element(self.browser, '#recent-submits')
-        assert carousel is not None, 'Carousel is not visible'
+        assert carousel is not None
 
         # when user clicks image, then will be moved to its page (new state)
         # the selenium tester decided to pick one what it see
@@ -124,7 +124,7 @@ class IndexPageTest(PageLayoutTestMixin):
         # it is some kind of drawer component, or accordion, or something like that
         self.get(self.page_url)
         preview = find_element(self.browser, '#model-previews')
-        assert preview is not None, 'Preview for models is not found'
+        assert preview is not None
 
         # our selenium tester will test all models in the container
         # model should be shown at least one
@@ -137,7 +137,7 @@ class IndexPageTest(PageLayoutTestMixin):
             # find header
             header = find_element(model, '.v-expansion-panel-header')
             assert header is not None,\
-                'No header for model to click; component changed? '.format(model_id)
+                'No header for model to click: {}; component changed? '.format(model_id)
 
             # open collapsed and check link
             header.click()
@@ -153,10 +153,6 @@ class HistoryPageTest(PageLayoutTestMixin):
     page_url = '/history'
     pattern = re.compile(r'^/history$')
 
-    def test_page_served_well(self):
-        self.get(self.page_url)
-        assert 'Take a Look' in self.browser.title
-
     def test_user_browse_images(self):
         # user get to history page to look around some kitty images, for time killing or whatever
         # and find the image container
@@ -166,21 +162,17 @@ class HistoryPageTest(PageLayoutTestMixin):
 
         # please be sure to add items are added!
         cards = find_elements_all(container, '.v-card')
-        assert len(cards) > 0
+        assert len(cards) > 0, 'No history in page; plz add it'
 
         # all images are linked to its detail page
         for card in cards:
             link = find_element(card, '.v-btn')
             assert check_url_pattern(link.get_attribute('href'), HistoryDetailPageTest.pattern)
 
-    def test_user_want_more_images(self):
-        # user click 'more' button to get more images
-
-        # axios(or ajax) will bring more data without re-loading page
-
-        # user find out that count of image increased
-
-        pass
+        # user find button 'more' and click it, then new cards will be present on window
+        old_card_count = len(cards)
+        card_brought = Wait(container, 10).until(lambda c: len(find_elements_all(c, '.v-card')) - old_card_count)
+        assert card_brought > 0, 'Elements has decreased but expected to increase; what have you done?'
 
 
 class HistoryDetailPageTest(PageLayoutTestMixin):
@@ -214,10 +206,6 @@ class ModelPageTest(PageLayoutTestMixin):
     page_url = '/model'
     pattern = re.compile(r'^/model$')
 
-    def test_page_well_served(self):
-        self.get(self.page_url)
-        assert 'Take a Look' in self.browser.title
-
     def test_user_browse_models(self):
         # user look around for available ML models
 
@@ -236,10 +224,6 @@ class ModelDetailPageTest(PageLayoutTestMixin):
         return f'/model/{name}'
 
     pattern = re.compile(r'^/model/\w+$')
-
-    def test_page_well_served(self):
-        self.get(self.page_url())
-        assert 'Take a Look' in self.browser.title
 
     def test_page_include_spec_description(self):
         # model spec includes description about it
