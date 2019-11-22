@@ -3,23 +3,41 @@
 
     this mainly tests hypermedia behaviors for user (front-end)
 
-    points to think about:
-    - for testing <a>, or link, will it be just appropriate?
-    - vue/vuetify components are not directly accessible via id; better way for doing this?
+    testing strategies:
+    - locate
+        - find elements by html id attribute
+        - find vuetify components via html class, like: .v-expansion-panel-header
+    - behavior
+        - link test with attribute 'href'
+
+    notes:
+    - selenium.webdriver.support.ui.WebDriverWait
+        - it takes webdriver as argument but i found that it is not necessarily be a selenium webdriver
+          because its behaviors are like:
+
+            while True:
+              value = method(driver)
+              if value:
+                  return value
+              else:
+                  wait(short)
+
+          so using selenium DOM element won't be a problem
+
 """
 import os
 import re
 import time
+from urllib.parse import urljoin
 import pytest
 from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.action_chains import ActionChains as Action
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait as Wait
 from test_helper import (
-    BrowserTestHelper,
     check_url_pattern,
-    find_element_by_css_selector, find_elements_by_css_selector
+    find_element, find_elements_all
 )
 
 
@@ -31,10 +49,28 @@ def browser():
     browser.quit()
 
 
-# ==================================================================================================================== #
+@pytest.mark.functional
+class PageTestBase:
+    """
+    helper class for functional tests with selenium webdriver
+    """
+    fixtures_to_use = ('browser', )
+    server_url = 'http://localhost:80'
+
+    @pytest.fixture(autouse=True)
+    def _auto_inject_fixtures(self, request):
+        """
+        this injects fixtures defined in 'fixtures_to_use' attribute into class instance attribute
+        """
+        names = self.fixtures_to_use
+        for name in names:
+            setattr(self, name, request.getfixturevalue(name))
+
+    def get(self, url):
+        return self.browser.get(urljoin(self.server_url, url))
 
 
-class IndexPageTest(BrowserTestHelper):
+class IndexPageTest(PageTestBase):
     """
     tests for /, application home page
     self.get() is being used multiple times because some tests may contain state change(hyperlinks, especially href)
@@ -49,26 +85,26 @@ class IndexPageTest(BrowserTestHelper):
     def test_bottom_navigation_bar_works_well(self):
         # user look layouts, especially our simple & fancy bottom bar
         self.get(self.page_url)
-        navbar = find_element_by_css_selector(self.browser, '#bottom-navbar')
+        navbar = find_element(self.browser, '#bottom-navbar')
         assert navbar is not None, 'Navigation bar is not found; did you forget?'
 
         # using 'navbar' instead of 'self.browser' to make sure that link is child of navbar
         for (selector, url_pattern) in [('#navbar-link-home', '^/$'),
                                         ('#navbar-link-history', '^/history$'),
                                         ('#navbar-link-model', '^/model$')]:
-            link = find_element_by_css_selector(navbar, selector)
+            link = find_element(navbar, selector)
             href = link.get_attribute('href')
             assert check_url_pattern(href, url_pattern)
 
     def test_user_enjoy_image_carousel(self):
         # user find image carousel
         self.get(self.page_url)
-        carousel = find_element_by_css_selector(self.browser, '#recent-submits')
+        carousel = find_element(self.browser, '#recent-submits')
         assert carousel is not None, 'Carousel is not visible'
 
         # when user clicks image, then will be moved to its page (new state)
         # the selenium tester decided to pick one what it see
-        links = find_elements_by_css_selector(carousel, 'a')
+        links = find_elements_all(carousel, 'a')
         for link in links:
             assert check_url_pattern(link.get_attribute('href'), r'^/history/\d+$')
 
@@ -76,29 +112,29 @@ class IndexPageTest(BrowserTestHelper):
         # finally user arrived at our models's preview
         # it is some kind of drawer component, or accordion, or something like that
         self.get(self.page_url)
-        preview = find_element_by_css_selector(self.browser, '#model-previews')
+        preview = find_element(self.browser, '#model-previews')
         assert preview is not None, 'Preview for models is not found'
 
         # our selenium tester will test all models in the container
         # then first collect all model ids
         models = [model.get_attribute('id')
                   for model
-                  in find_elements_by_css_selector(preview, '.v-expansion-panel')]
+                  in find_elements_all(preview, '.v-expansion-panel')]
         assert None not in models, 'All items in model preview must have id for identification'
 
         # click and check href one by one
         for eid in models:
-            model = find_element_by_css_selector(self.browser, f'#{eid}')
-            btn = find_element_by_css_selector(model, 'button')
-            _ = btn.location_once_scrolled_into_view  # scroll to model
-            btn.click()
-            link = WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a')))
-            assert link is not None, \
-                'No link in this model: {}; did you forget?'.format(model.get_attribute('id'))
+            model = find_element(self.browser, f'#{eid}')
+            header = find_element(model, '.v-expansion-panel-header')
+            assert header is not None, 'No header for model to click: {}; component changed? '.format(eid)
+
+            header.click()
+            link = Wait(model, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.v-btn')))
+            assert link is not None, 'No link in this model: {}; did you forget?'.format(eid)
             assert check_url_pattern(link.get_attribute('href'), r'^/model/\w+$')
 
 
-class HistoryPageTest(BrowserTestHelper):
+class HistoryPageTest(PageTestBase):
     """
     tests for /history, user submitted image list page
     """
@@ -112,14 +148,14 @@ class HistoryPageTest(BrowserTestHelper):
         # user get to history page to look around some kitty images, for time killing or whatever
         # and find the image container
         self.get(self.page_url)
-        container = find_element_by_css_selector(self.browser, '#image-container')
+        container = find_element(self.browser, '#image-container')
         assert container is not None
 
         # and pick first one, and it is linked to its detail page!
         assert False, 'Test is not done'
 
 
-class HistoryDetailPageTest(BrowserTestHelper):
+class HistoryDetailPageTest(PageTestBase):
     """
     tests for /history/:id, user submitted image detail with specific informations about it
     """
@@ -131,7 +167,7 @@ class HistoryDetailPageTest(BrowserTestHelper):
         pass
 
 
-class ModelPageTest(BrowserTestHelper):
+class ModelPageTest(PageTestBase):
     """
     tests for /model, list of machine learning models supported by server will be shown
     """
@@ -142,7 +178,7 @@ class ModelPageTest(BrowserTestHelper):
         assert 'Take a Look' in self.browser.title
 
 
-class ModelDetailPageTest(BrowserTestHelper):
+class ModelDetailPageTest(PageTestBase):
     """
     tests for /model/:name/, where detailed description of ML model provided
     it is likely to include some visualization components
