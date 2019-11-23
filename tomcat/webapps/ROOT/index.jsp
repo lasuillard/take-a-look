@@ -7,13 +7,13 @@
     <title>Take a Look</title>
   </head>
   <body>
-    <div id="app">
-      <v-app>
-        <v-parallax 
-          src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
-          style="position: absolute; top: 50vh; right: 0; width: 100%; height: 60vh; z-index: 0;"
-        ></v-parallax>
-        <v-content style="z-index: 1;">
+    <v-app id="app">
+      <v-parallax 
+        src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
+        style="position: absolute; top: 50vh; right: 0; width: 100%; height: 60vh; z-index: 0;"
+      ></v-parallax>
+      <v-content style="z-index: 1;">
+        <v-container fluid>
           <v-row class="mt-10" align="center" justify="center">
             <v-col class="text-center" cols="12">
               <h1 class="font-weight-regular text-uppercase display-3">Take a Look</h1>
@@ -48,9 +48,6 @@
                     <v-container>
                       Oh, some saying
                     </v-container>
-                    <v-flex class="text-right">
-                      <v-btn id="model-1-link" text link href="/model/svm">Let's see</v-btn>
-                    </v-flex>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
                 <v-expansion-panel id="model-2">
@@ -59,22 +56,20 @@
                     <v-container>
                       Oh, some saying
                     </v-container>
-                    <v-flex class="text-right">
-                      <v-btn id="model-2-link" text link href="/model/cnn">Let's see</v-btn>
-                    </v-flex>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
             </v-col>
           </v-row>
           <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-        </v-content>
-        <%@ include file="/WEB-INF/jsp/components/bottom-nav-bar.jsp" %>
-      </v-app>
-    </div>
+        </v-container>
+      </v-content>
+      <%@ include file="/WEB-INF/jsp/components/bottom-nav-bar.jsp" %>
+      <%@ include file="/WEB-INF/jsp/components/footer.jsp" %>
+    </v-app>
   </body>
   <script>
-    new Vue({
+    var app =new Vue({
       el: '#app',
       vuetify: new Vuetify(),
       data: () => ({
@@ -85,19 +80,15 @@
           items: [
             {
               src: 'https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg',
-              link: '/history/1',
             },
             {
               src: 'https://cdn.vuetifyjs.com/images/carousel/sky.jpg',
-              link: '/history/2',
             },
             {
               src: 'https://cdn.vuetifyjs.com/images/carousel/bird.jpg',
-              link: '/history/3',
             },
             {
               src: 'https://cdn.vuetifyjs.com/images/carousel/planet.jpg',
-              link: '/history/4',
             },
           ]
         }

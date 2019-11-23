@@ -12,10 +12,11 @@
 
       </v-content>
       <%@ include file="/WEB-INF/jsp/components/bottom-nav-bar.jsp" %>
+      <%@ include file="/WEB-INF/jsp/components/footer.jsp" %>
     </v-app>
   </body>
   <script>
-    new Vue({
+    var app = new Vue({
       el: '#app',
       vuetify: new Vuetify(),
       data: () => ({

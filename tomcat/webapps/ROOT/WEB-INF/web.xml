@@ -16,12 +16,12 @@
   </welcome-file-list>
 
   <servlet>
-    <servlet-name>history-jsp</servlet-name>
-    <jsp-file>/history.jsp</jsp-file>
+    <servlet-name>model-jsp</servlet-name>
+    <jsp-file>/model.jsp</jsp-file>
   </servlet>
   <servlet-mapping>
-    <servlet-name>history-jsp</servlet-name>
-    <url-pattern>/history</url-pattern>
+    <servlet-name>model-jsp</servlet-name>
+    <url-pattern>/model</url-pattern>
   </servlet-mapping>
 
   <servlet>
@@ -31,15 +31,6 @@
   <servlet-mapping>
     <servlet-name>history-detail-jsp</servlet-name>
     <url-pattern>/history/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet>
-    <servlet-name>model-jsp</servlet-name>
-    <jsp-file>/model.jsp</jsp-file>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>model-jsp</servlet-name>
-    <url-pattern>/model</url-pattern>
   </servlet-mapping>
 
   <servlet>

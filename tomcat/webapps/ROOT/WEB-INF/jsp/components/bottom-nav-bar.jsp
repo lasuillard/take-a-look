@@ -4,10 +4,6 @@
       <span>Home</span>
       <v-icon>mdi-home</v-icon>
     </v-btn>
-    <v-btn id="navbar-link-history" value="history" href="/history">
-      <span>History</span>
-      <v-icon>mdi-view-dashboard</v-icon>
-    </v-btn>
     <v-btn id="navbar-link-model" value="model" href="/model">
       <span>Model</span>
       <v-icon>mdi-graph</v-icon>
