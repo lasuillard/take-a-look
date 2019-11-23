@@ -3,6 +3,10 @@
 
     this mainly tests hypermedia behaviors for user (front-end)
 
+    TODO:
+    - url mapping for tomcat jsp files, {model/history}-detail
+
+
     testing strategies:
     - locate
         - find elements by html id attribute
@@ -80,18 +84,23 @@ class PageLayoutTestMixin(PageTestBase):
 
     def test_page_well_served(self):
         # user visit main page and find 'Take a Look' in title
-        self.get(self.page_url() if callable(self.page_url) else self.page_url)
+        self.get(self.page_url)
         assert 'Take a Look' in self.browser.title
+
+    def test_page_has_common_footer(self):
+        # page has footer
+        self.get(self.page_url)
+        footer = find_element(self.browser, '#footer')
+        assert footer is not None
 
     def test_bottom_navbar_works_well(self):
         # user look layouts, especially our simple & fancy bottom bar
-        self.get(self.page_url() if callable(self.page_url) else self.page_url)
+        self.get(self.page_url)
         navbar = find_element(self.browser, '#bottom-navbar')
         assert navbar is not None
 
         # using 'navbar' instead of 'self.browser' to make sure that link is child of navbar
         for (selector, url_pattern) in [('#navbar-link-home', IndexPageTest.pattern),
-                                        ('#navbar-link-history', HistoryPageTest.pattern),
                                         ('#navbar-link-model', ModelPageTest.pattern),
                                         ('#navbar-link-predict', PredictPageTest.pattern)]:
             link = find_element(navbar, selector)
@@ -107,17 +116,11 @@ class IndexPageTest(PageLayoutTestMixin):
     page_url = '/'
     pattern = re.compile(r'^/$')
 
-    def test_user_enjoy_image_carousel(self):
+    def test_page_has_carousel_linked_to_history(self):
         # user find image carousel
         self.get(self.page_url)
         carousel = find_element(self.browser, '#recent-submits')
         assert carousel is not None
-
-        # when user clicks image, then will be moved to its page (new state)
-        # the selenium tester decided to pick one what it see
-        links = find_elements_all(carousel, 'a')
-        for link in links:
-            assert check_url_pattern(link.get_attribute('href'), HistoryDetailPageTest.pattern)
 
     def test_simple_descriptions_of_models_provided(self):
         # finally user arrived at our models's preview
@@ -131,31 +134,44 @@ class IndexPageTest(PageLayoutTestMixin):
         models = find_elements_all(preview, '.v-expansion-panel')
         assert len(models) > 0
 
-        # click model header to open and check links for its detail page
-        for model in models:
-            model_id = model.get_attribute('id')
-            # find header
-            header = find_element(model, '.v-expansion-panel-header')
-            assert header is not None,\
-                'No header for model to click: {}; component changed? '.format(model_id)
 
-            # open collapsed and check link
-            header.click()
-            link = Wait(model, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.v-btn')))
-            assert link is not None, 'No link in this model: {}; did you forget?'.format(model_id)
-            assert check_url_pattern(link.get_attribute('href'), ModelDetailPageTest.pattern)
-
-
-class HistoryPageTest(PageLayoutTestMixin):
+class ModelPageTest(PageLayoutTestMixin):
     """
     tests for /history, user submitted image list page
     """
-    page_url = '/history'
-    pattern = re.compile(r'^/history$')
+    page_url = '/model'
+    pattern = re.compile(r'^/model$')
 
-    def test_user_browse_images(self):
+    def test_models_available(self):
+        # models are gathered at model container
+        container = find_element(self.browser, '#model-container')
+        assert container is not None
+
+        # check is there any model in page
+        models = find_elements_all(container, '.v-')
+        assert len(models) > 0, 'No model provided; add it'
+
+        # user check model by its modal window
+        assert False, 'Test is not done'
+
+    def test_open_dialog_for_history_detail(self):
         # user get to history page to look around some kitty images, for time killing or whatever
         # and find the image container
+        self.get(self.page_url)
+        container = find_element(self.browser, '#image-container')
+        assert container is not None
+
+        # when user clicks image, modal for this image will be popped up and will load data via AJAX
+        # test all of it for fixture we provided
+        cards = find_elements_all(container, '.v-card')
+        for card in cards:
+            btn_detail = find_element(card, '.v-btn')
+            assert btn_detail is not None
+
+        # how to test modal?
+        pass
+
+    def test_load_more_contents(self):
         self.get(self.page_url)
         container = find_element(self.browser, '#image-container')
         assert container is not None
@@ -164,75 +180,15 @@ class HistoryPageTest(PageLayoutTestMixin):
         cards = find_elements_all(container, '.v-card')
         assert len(cards) > 0, 'No history in page; plz add it'
 
-        # all images are linked to its detail page
-        for card in cards:
-            link = find_element(card, '.v-btn')
-            assert check_url_pattern(link.get_attribute('href'), HistoryDetailPageTest.pattern)
+        # user find button 'more'
+        btn = find_element(container, '#more-btn')
+        assert btn is not None
 
-        # user find button 'more' and click it, then new cards will be present on window
+        # and click it, then new cards will be present on window
+        btn.click()
         old_card_count = len(cards)
-        card_brought = Wait(container, 10).until(lambda c: len(find_elements_all(c, '.v-card')) - old_card_count)
-        assert card_brought > 0, 'Elements has decreased but expected to increase; what have you done?'
-
-
-class HistoryDetailPageTest(PageLayoutTestMixin):
-    """
-    tests for /history/:id, user submitted image detail with specific information about it
-    """
-    @staticmethod
-    def page_url(item=1):  # /history/:item
-        return f'/history/{item}'
-
-    pattern = re.compile(r'^/history/\d+$')
-
-    def test_page_well_served(self):
-        self.get(self.page_url())
-        assert 'Take a Look' in self.browser.title
-
-    def test_page_includes_descriptions(self):
-        # history includes its id number
-
-        # and prediction model and result, user submitted label
-
-        # and visualized information for it
-
-        pass
-
-
-class ModelPageTest(PageLayoutTestMixin):
-    """
-    tests for /model, list of machine learning models supported by server will be shown
-    """
-    page_url = '/model'
-    pattern = re.compile(r'^/model$')
-
-    def test_user_browse_models(self):
-        # user look around for available ML models
-
-        # and is linked to its detail page
-
-        pass
-
-
-class ModelDetailPageTest(PageLayoutTestMixin):
-    """
-    tests for /model/:name, where detailed description of ML model provided
-    it is likely to include some visualization components
-    """
-    @staticmethod
-    def page_url(name='svm'):
-        return f'/model/{name}'
-
-    pattern = re.compile(r'^/model/\w+$')
-
-    def test_page_include_spec_description(self):
-        # model spec includes description about it
-
-        # and metadata, like hyperparameter or sth for model
-
-        # and visualized info
-
-        pass
+        card_brought = Wait(container, 5).until(lambda c: len(find_elements_all(c, '.v-card')) - old_card_count)
+        assert card_brought > 0, 'Elements expected to increase; what have you done?'
 
 
 class PredictPageTest(PageLayoutTestMixin):

@@ -11,6 +11,9 @@ def check_url_pattern(url, pattern):
     """
     receive absolute or relative url, and 'path' part will be compared to regex pattern
     """
+    if not isinstance(url, str):
+        return False
+
     if isinstance(pattern, str):
         p = re.compile(pattern)
     elif isinstance(pattern, re.Pattern):
