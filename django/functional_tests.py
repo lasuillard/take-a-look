@@ -31,7 +31,7 @@
 """
 import os
 import re
-import time
+import random
 from urllib.parse import urljoin
 import pytest
 from selenium import webdriver
@@ -148,11 +148,8 @@ class ModelPageTest(PageLayoutTestMixin):
         assert container is not None
 
         # check is there any model in page
-        models = find_elements_all(container, '.v-')
+        models = find_elements_all(container, '.v-tab')
         assert len(models) > 0, 'No model provided; add it'
-
-        # user check model by its modal window
-        assert False, 'Test is not done'
 
     def test_open_dialog_for_history_detail(self):
         # user get to history page to look around some kitty images, for time killing or whatever
@@ -168,7 +165,7 @@ class ModelPageTest(PageLayoutTestMixin):
             btn_detail = find_element(card, '.v-btn')
             assert btn_detail is not None
 
-        # how to test modal?
+        # TODO: proper way testing modal?
         pass
 
     def test_load_more_contents(self):
@@ -200,13 +197,31 @@ class PredictPageTest(PageLayoutTestMixin):
 
     def test_user_request_for_prediction(self):
         # user select image file and model to use for test
+        self.get(self.page_url)
+        form_upload = find_element(self.browser, '#upload-image')
+        assert form_upload
+        form_upload.send_keys('C:/Users/dldbc/Downloads/sample_image.jpg')
+
+        # select model for prediction
+        form_select_model = find_element(self.browser, '#prediction-model')
+        form_model_item = random.choice(find_elements_all(form_select_model, '.v-select'))
+        assert form_select_model and form_model_item
+        form_model_item.click()
+
+        # and label for it
+        form_label_it = find_element(self.browser, '#image-label')
+        form_label_item = random.choice(find_elements_all(form_label_it, '.v-select'))
+        assert form_label_it and form_label_item
+        form_label_item.click()
 
         # user submit the request and wait for prediction done
-        # and form will be blocked for 10 seconds
+        form_submit = find_element(self.browser, '#request-submit')
+        assert form_submit
+        form_submit.click()
 
-        # will receive url for result when the job is done
-
-        pass
+        # user will receive url for result when the job is done
+        result_alert = Wait(self.browser, 10).until(lambda b: find_element(b, '#result'))
+        assert result_alert
 
     def test_user_try_wrong_request(self):
         # user forgot to fill some data for request but try to send it
