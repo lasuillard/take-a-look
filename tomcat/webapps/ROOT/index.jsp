@@ -64,6 +64,7 @@
           <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
         </v-container>
       </v-content>
+      <%@ include file="/WEB-INF/jsp/components/appbar.jsp" %>
       <%@ include file="/WEB-INF/jsp/components/bottom-nav-bar.jsp" %>
       <%@ include file="/WEB-INF/jsp/components/footer.jsp" %>
     </v-app>

@@ -13,35 +13,49 @@
           <v-row>
             <v-col>
               <h1 class="ml-6 font-weight-regular display-2">Model</h1>
+              <p class="mt-4 ml-1">Our models trained in python 3.x using Keras 2.2.4-tf with TensorFlow 1.15.0 and Scikit-learn 0.21.3. below is the detail of each model.</p>
               <v-card class="mt-6" flat tile>
                 <v-tabs vertical>
-                  <template v-for="model in models">
-                    <v-tab>{{ model.name }}</v-tab>
-                    <v-tab-item>
-                      <v-card flat>
-                        <v-card-text>
-                          {{ model.text }}
-                        </v-card-text>
-                      </v-card>
-                    </v-tab-item>
-                  </template>
+                  <v-tab>SVM</v-tab>
+                  <v-tab-item>
+                    <v-card flat class="mt-2">
+                      <v-card-text>
+                        <div>
+                          <p class="display-1">Support Vector Machine</p>
+                          <p class="title">- Description</p>
+                          <div class="body-2 pl-3 mb-3">
+                            &nbsp;Classification model trained by sklearn.svm.SVC, take input as features extracted by VGG19 pre-trained layers.<br/>
+                            its accuracy took about 83% in test.
+                          </div>
+
+                          <p class="title">- Visualization</p>
+                          <div class="body-2 pl-3 mb-3">
+                            -
+                          </div>
+                        </div>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
                 </v-tabs>
               </v-card>
             </v-col>
           </v-row>
         </v-container>
+
+        <v-divider></v-divider>
+
         <v-container id="image-container" fluid>
           <v-row class="mt-3">
             <v-col cols="12">
               <h1 class="ml-6 font-weight-regular display-2">History</h1>
+              <p class="mt-4 ml-1">Submitted and processed images are below!</p>
             </v-col>
           </v-row>
-          <v-divider class="mt-3 mb-7"></v-divider>
           <v-row>
             <v-col
               v-for="card in cards"
               :key="card.id"
-              sm="12" md="4" lg="3"
+              cols="12" sm="6" md="4" lg="3"
             >
               <v-card>
                 <v-img
@@ -90,6 +104,7 @@
           </v-card>
         </v-dialog>
       </v-content>
+      <%@ include file="/WEB-INF/jsp/components/appbar.jsp" %>
       <%@ include file="/WEB-INF/jsp/components/bottom-nav-bar.jsp" %>
       <%@ include file="/WEB-INF/jsp/components/footer.jsp" %>
     </v-app>
