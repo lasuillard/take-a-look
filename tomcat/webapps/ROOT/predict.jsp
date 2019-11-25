@@ -15,15 +15,22 @@
               <v-card>
                 <v-card-title>Predict</v-card-title>
                 <v-card-text>
-                  <v-form class="px-3 py-1">
-                    <v-file-input v-model="form.image" accept="image/*" label="Image input"></v-file-input>
+                  <v-form id="prediction-form" class="px-3 py-1">
+                    <v-file-input 
+                      id="upload-image"
+                      v-model="form.image"
+                      accept="image/*"
+                      label="Image input"
+                    ></v-file-input>
                     <v-select
+                      id="select-label"
                       v-model="form.label"
                       :items="['Cat', 'Dog']"
                       prepend-icon="mdi-label"
                       label="Label of image"
                     ></v-select>
                     <v-select
+                      id="select-model"
                       v-model="form.model"
                       :items="['SVM', 'CNN']"
                       prepend-icon="mdi-graph"
@@ -32,7 +39,12 @@
                       label="Model to use"
                     ></v-select>
                     <v-layout class="mt-6 justify-end">
-                      <v-btn text color="primary" :disabled="loading" @click="predict">Submit</v-btn>
+                      <v-btn 
+                        id="request-submit"
+                        text color="primary"
+                        :disabled="loading"
+                        @click="predict"
+                      >Submit</v-btn>
                     </v-layout>
                   </v-form>
                 </v-card-text>
@@ -41,8 +53,9 @@
             <v-col cols="12" lg="6">
               <v-card :loading="loading">
                 <v-card-title>Result</v-card-title>
+                <v-card-text>Status: <span id="result-sign">{{ result.status }}</span></v-card-text>
                 <v-card-text>
-                  <p class="subtitle-1">&dash; Request</p>
+                  <p class="subtitle-1">&dash; Request (TEMPORARY)</p>
                   <div 
                     v-for="key in Object.keys(form)" 
                     :key="key"
@@ -50,13 +63,14 @@
                     >{{ key }}: {{ form[key] }}<br/>
                   </div>
 
-                  <p class="subtitle-1">&dash; Response</p>
+                  <p class="subtitle-1">&dash; Response (TEMPORARY)</p>
                   <div 
                     v-for="key in Object.keys(result)" 
                     :key="key"
                     class="body-2 pl-3 mb-3"
                     >{{ key }}: {{ result[key] }}<br/>
                   </div>
+
                 </v-card-text>
               </v-card>
             </v-col>
@@ -85,6 +99,7 @@
         // response
         loading: false,
         result: {
+          status: 'Ready',
           id: null,
           prediction: null,
         }
@@ -94,6 +109,7 @@
           this.loading = true
           setTimeout(() => {
             this.loading = false
+            this.result.status = 'OK'
             this.result.id = 3
             this.result.prediction = 'Dog'
           }, 4000)

@@ -99,7 +99,7 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="red lighten-1" text @click="dialog.open = false">Close</v-btn>
+              <v-btn id="close-dialog" color="red lighten-1" text @click="dialog.open = false">Close</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
