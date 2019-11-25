@@ -4,13 +4,14 @@
     this mainly tests hypermedia behaviors for user (front-end)
 
     TODO:
-    - url mapping for tomcat jsp files, {model/history}-detail
+    - replace all find_element and find_elements_all with selenium default for consistency and readability
+    - filtering supports on history
 
 
     testing strategies:
     - locate
-        - find elements by html id attribute
-        - find vuetify components via html class, like: .v-expansion-panel-header
+        step 1. wide search: find elements by html id attribute
+        step 2. narrow down: find vuetify components via html class, like: .v-expansion-panel-header
     - behavior
         - link test with attribute 'href'
 
@@ -38,7 +39,7 @@ from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains as Action
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait as Wait
+from selenium.webdriver.support.ui import WebDriverWait as Wait, Select
 from test_helper import (
     check_url_pattern,  # use compiled pattern in repeated tests
     find_element, find_elements_all
@@ -91,13 +92,13 @@ class PageLayoutTestMixin(PageTestBase):
         # page has footer
         self.get(self.page_url)
         footer = find_element(self.browser, '#footer')
-        assert footer is not None
+        assert footer
 
     def test_bottom_navbar_works_well(self):
         # user look layouts, especially our simple & fancy bottom bar
         self.get(self.page_url)
         navbar = find_element(self.browser, '#bottom-navbar')
-        assert navbar is not None
+        assert navbar
 
         # using 'navbar' instead of 'self.browser' to make sure that link is child of navbar
         for (selector, url_pattern) in [('#navbar-link-home', IndexPageTest.pattern),
@@ -120,14 +121,14 @@ class IndexPageTest(PageLayoutTestMixin):
         # user find image carousel
         self.get(self.page_url)
         carousel = find_element(self.browser, '#recent-submits')
-        assert carousel is not None
+        assert carousel
 
     def test_simple_descriptions_of_models_provided(self):
         # finally user arrived at our models's preview
         # it is some kind of drawer component, or accordion, or something like that
         self.get(self.page_url)
         preview = find_element(self.browser, '#model-previews')
-        assert preview is not None
+        assert preview
 
         # our selenium tester will test all models in the container
         # model should be shown at least one
@@ -137,7 +138,7 @@ class IndexPageTest(PageLayoutTestMixin):
 
 class ModelPageTest(PageLayoutTestMixin):
     """
-    tests for /history, user submitted image list page
+    tests for /model, user submitted image list page
     """
     page_url = '/model'
     pattern = re.compile(r'^/model$')
@@ -145,7 +146,7 @@ class ModelPageTest(PageLayoutTestMixin):
     def test_models_available(self):
         # models are gathered at model container
         container = find_element(self.browser, '#model-container')
-        assert container is not None
+        assert container
 
         # check is there any model in page
         models = find_elements_all(container, '.v-tab')
@@ -156,17 +157,28 @@ class ModelPageTest(PageLayoutTestMixin):
         # and find the image container
         self.get(self.page_url)
         container = find_element(self.browser, '#image-container')
-        assert container is not None
+        assert container
 
         # when user clicks image, modal for this image will be popped up and will load data via AJAX
         # test all of it for fixture we provided
         cards = find_elements_all(container, '.v-card')
         for card in cards:
+            # look for button to open dialog
             btn_detail = find_element(card, '.v-btn')
-            assert btn_detail is not None
+            assert btn_detail
 
-        # TODO: proper way testing modal?
-        pass
+            # click the button and check contents
+            btn_detail.click()
+            dialog = Wait(self.browser, 3).until(
+                EC.visibility_of_element_located((By.ID, 'history-dialog')),
+            )
+            assert dialog
+
+            # click close button and check dialog closed
+            btn_close = Wait(self.browser, 3).until(EC.visibility_of_element_located((By.ID, 'close-dialog')))
+            btn_close.click()
+            is_closed = Wait(self.browser, 3).until(EC.invisibility_of_element(dialog))
+            assert is_closed
 
     def test_load_more_contents(self):
         self.get(self.page_url)
@@ -196,32 +208,36 @@ class PredictPageTest(PageLayoutTestMixin):
     pattern = re.compile(r'^/predict$')
 
     def test_user_request_for_prediction(self):
-        # user select image file and model to use for test
+        # find form first
         self.get(self.page_url)
-        form_upload = find_element(self.browser, '#upload-image')
-        assert form_upload
-        form_upload.send_keys('C:/Users/dldbc/Downloads/sample_image.jpg')
+        prediction_form = find_element(self.browser, '#prediction-form')
+        assert prediction_form
 
-        # select model for prediction
-        form_select_model = find_element(self.browser, '#prediction-model')
-        form_model_item = random.choice(find_elements_all(form_select_model, '.v-select'))
-        assert form_select_model and form_model_item
-        form_model_item.click()
+        # select image
+        upload_image = find_element(prediction_form, '#upload-image')
+        assert upload_image
+        upload_image.send_keys('C:/Users/dldbc/Downloads/sample_image.jpg')
 
         # and label for it
-        form_label_it = find_element(self.browser, '#image-label')
-        form_label_item = random.choice(find_elements_all(form_label_it, '.v-select'))
-        assert form_label_it and form_label_item
-        form_label_item.click()
+        label_of_item = find_element(prediction_form, '#select-label')
+        assert label_of_item
+        label_of_item.send_keys('Cat')
+
+        # select model for prediction
+        model_to_use = find_element(prediction_form, '#select-model')
+        assert model_to_use
+        model_to_use.send_keys('SVM')
 
         # user submit the request and wait for prediction done
-        form_submit = find_element(self.browser, '#request-submit')
+        form_submit = Wait(prediction_form, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#request-submit')))
         assert form_submit
         form_submit.click()
 
         # user will receive url for result when the job is done
-        result_alert = Wait(self.browser, 10).until(lambda b: find_element(b, '#result'))
-        assert result_alert
+        result_sign = find_element(self.browser, '#result-sign')
+        old_text = result_sign.text
+        is_changed = Wait(result_sign, 10).until(lambda e: e.text != old_text)
+        assert is_changed
 
     def test_user_try_wrong_request(self):
         # user forgot to fill some data for request but try to send it
