@@ -3,11 +3,6 @@
 
     this mainly tests hypermedia behaviors for user (front-end)
 
-    TODO:
-    - replace all find_element and find_elements_all with selenium default for consistency and readability
-    - filtering supports on history
-
-
     testing strategies:
     - locate
         step 1. wide search: find elements by html id attribute

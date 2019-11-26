@@ -1,9 +1,17 @@
 """ /api/tests.py
     perform server-level isolated(using pytest-django live_server fixture) tests
+
+    testing strategy:
+    - what would be most efficient and proper way API behavior?
+        - response data format, fields, ...: duck-typing?
+        - headers?
+
 """
+import random
 import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
+from core.models import History
 
 
 @pytest.fixture(scope='session')
@@ -25,6 +33,7 @@ class HCTest:
 
 @pytest.mark.unit
 @pytest.mark.api
+@pytest.mark.django_db
 class APITest:
     """
     tests views for model prediction API
@@ -37,61 +46,35 @@ class APITest:
         setattr(self, 'server_url', request.getfixturevalue('live_server').url)
         setattr(self, 'client', request.getfixturevalue('client'))
 
-    def test_get_history_specific_item(self):
-        # return specific history, and
-        # get response and check it well came
-        response = self.client.get(self.server_url + '/api/history/')
-        assert response.status_code == status.HTTP_200_OK
-
-        history_list = [model.aka for model in response.data.results]
-        # check given resource has results list field
-        assert isinstance(response.data.results, list)
-
-        # it follows rules of list search url
-        for item in history_list[:5]:
-            for field in ('img', 'model', 'label', 'class'):
-                assert field in item.keys(), 'Required field {} not found in {}'.format(field, item)
-
-    def test_get_model_short_description(self):
-        # return short descriptive preview such as available models, descriptions, test metrics
+    def test_get_model_items(self):
         # check status code is OK
         response = self.client.get(self.server_url + '/api/model/')
         assert response.status_code == status.HTTP_200_OK
 
         # it should contain list of item
-        assert isinstance(response.data.results, list)
-
-        # for every models, check it has must-have fields
-        for model in response.data.results:
-            keys = model.keys()
-            for field in ('aka', 'name', 'short_desc', 'test_metrics'):
-                assert field in keys, 'Field {} not in {}'.format(field, model)
-
-    def test_get_model_detail_information(self):
-        # return more detailed description of specific model, including visualization resources and more
-        response = self.client.get(self.server_url + '/api/model/')
-        assert response.status_code == status.HTTP_200_OK
-
-        available_models = [model.aka for model in response.data.results]
-        for model in available_models:
-            # send request for detail information of specific model
-            response = self.client.get(self.server_url + f'/api/model/{model}/')
-            assert response.status_code == status.HTTP_200_OK
-
-            # check fields are in response data
-            keys = model.keys()
-            for field in ('aka', 'name', 'description', 'test_metrics', 'visualization'):
-                assert field in keys, "Model {} don't have field {}".format(model, field)
+        items = response.data['results']
+        assert isinstance(items, list) and len(items) > 0
 
     def test_post_predict_image(self, client, live_server):
         # user request for prediction with data: image file, label of it, prediction model
         data = {
             'image': open('C:/Users/dldbc/Downloads/sample_image.jpg', mode='rb'),
-            'label': 'Cat',
-            'model': 'svm',
+            'label': random.choice(History.CLASSES),
+            'model': random.choice(History.SUPPORTED_MODELS),
         }
         response = self.client.post(self.server_url + '/api/predict/', data=data)
         assert response.status_code == status.HTTP_201_CREATED
 
-        # and it will return history object created
-        pass
+    def test_get_history_items(self):
+        # get response and check it well came
+        response = self.client.get(self.server_url + '/api/history/')
+        assert response.status_code == status.HTTP_200_OK
+
+        # check given resource has results list field
+        items = response.data['results']
+        assert isinstance(items, list)
+
+        # each item retrieve check
+        for item in items[:5]:
+            response = self.client.get(item['url'])
+            assert response.status_code == status.HTTP_200_OK
