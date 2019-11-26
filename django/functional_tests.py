@@ -37,9 +37,10 @@ from urllib.parse import urljoin
 import pytest
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains as Action
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait as Wait, Select
+from selenium.webdriver.support.ui import WebDriverWait as Wait
 from test_helper import (
     check_url_pattern,  # use compiled pattern in repeated tests
 )
@@ -54,6 +55,7 @@ def browser():
 
 
 @pytest.mark.functional
+@pytest.mark.frontend
 class PageTestBase:
     """
     helper class for functional tests with selenium webdriver
@@ -163,7 +165,7 @@ class ModelPageTest(PageLayoutTestMixin):
 
         # when user clicks image, modal for this image will be popped up and will load data via AJAX
         # test all of it for fixture we provided
-        cards = container.find_elements_by_css_selector('.v-card')
+        cards = container.find_elements_by_css_selector('.v-card')[:5]
         for card in cards:
             # look for button to open dialog
             btn_detail = card.find_element_by_css_selector('.v-btn')
@@ -179,11 +181,12 @@ class ModelPageTest(PageLayoutTestMixin):
             assert dialog
 
             # click close button and check dialog closed
-            btn_close = Wait(self.browser, 3).until(
-                EC.element_to_be_clickable((By.ID, 'close-dialog')),
+            btn_close = Wait(dialog, 3).until(
+                EC.element_to_be_clickable((By.ID, 'dialog-btn-close')),
                 message='Close button for dialog not found'
             )
-            btn_close.click()
+            btn_close.send_keys(Keys.RETURN)
+            _ = btn_close.location_once_scrolled_into_view
             is_closed = Wait(self.browser, 3).until(EC.invisibility_of_element(dialog), message='Dialog still visible')
             assert is_closed
 
