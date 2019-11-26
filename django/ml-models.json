@@ -1,0 +1,35 @@
+[
+  {
+    "kind": "svm",
+    "featextr": "/model/featextr.h5",
+    "kernel": "/model/svm.joblib",
+    "instance": {
+      "aka": "svm",
+      "name": "Support Vector Machine",
+      "intro": "svm intro",
+      "desc": "svm desc",
+      "metrics": {
+        "accuracy": 0.83,
+        "precision": null,
+        "recall": null,
+        "f1-score": null
+      }
+    }
+  },
+  {
+    "kind": "cnn",
+    "model": "/model/cnn.h5",
+    "instance": {
+      "aka": "cnn",
+      "name": "Convolutional Neural Network",
+      "intro": "cnn intro",
+      "desc": "cnn desc",
+      "metrics": {
+        "accuracy": 0.95,
+        "precision": null,
+        "recall": null,
+        "f1-score": null
+      }
+    }
+  }
+]
