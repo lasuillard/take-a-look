@@ -1,5 +1,6 @@
 staticfiles/
 .idea
+models/
 
 # Created by https://www.gitignore.io/api/venv,python,django
 # Edit at https://www.gitignore.io/?templates=venv,python,django

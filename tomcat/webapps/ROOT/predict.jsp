@@ -25,17 +25,20 @@
                     <v-select
                       id="select-label"
                       v-model="form.label"
-                      :items="['cat', 'dog']"
+                      :items="labels"
+                      item-text="display_name"
+                      item-value="value"
                       prepend-icon="mdi-label"
                       label="Label of image"
                     ></v-select>
                     <v-select
                       id="select-model"
                       v-model="form.model"
-                      :items="['svm', 'cnn']"
+                      :items="models"
+                      item-text="display_name"
+                      item-value="value"
                       prepend-icon="mdi-graph"
                       hide-details
-                      single-line
                       label="Model to use"
                     ></v-select>
                     <v-layout class="mt-6 justify-end">
@@ -91,6 +94,8 @@
           context: 'predict'
         },
         // request
+        labels: [],
+        models: [],
         form: {
           img: null,
           label: null,
@@ -121,6 +126,11 @@
             this.loading = false
           })
         }
+      },
+      async created () {
+        var option = await axios.options('/api/history/')
+        this.labels = option.data.actions.POST.label.choices
+        this.models = option.data.actions.POST.model.choices
       }
     })
   </script>

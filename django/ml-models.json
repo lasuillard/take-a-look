@@ -1,8 +1,8 @@
 [
   {
     "kind": "svm",
-    "featextr": "/model/featextr.h5",
-    "kernel": "/model/svm.joblib",
+    "featextr": "./models/featextr.h5",
+    "kernel": "./models/svm.joblib",
     "instance": {
       "aka": "svm",
       "name": "Support Vector Machine",
@@ -17,8 +17,25 @@
     }
   },
   {
+    "kind": "dt",
+    "featextr": "./models/featextr.h5",
+    "clf": "./models/dectr.joblib",
+    "instance": {
+      "aka": "dt",
+      "name": "Decision Tree",
+      "intro": "dt intro",
+      "desc": "dt desc",
+      "metrics": {
+        "accuracy": 0.85,
+        "precision": null,
+        "recall": null,
+        "f1-score": null
+      }
+    }
+  },
+  {
     "kind": "cnn",
-    "model": "/model/cnn.h5",
+    "model": "./models/cnn.h5",
     "instance": {
       "aka": "cnn",
       "name": "Convolutional Neural Network",

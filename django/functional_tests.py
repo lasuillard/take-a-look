@@ -177,13 +177,13 @@ class ModelPageTest(PageLayoutTestMixin):
         assert btn is not None
 
         # and click it, then new cards will be present on window
-        btn.click()
+        Action(self.browser).move_to_element(btn).click(btn).perform()
         old_card_count = len(cards)
         card_brought = Wait(container, 5).until(
-            lambda c: len(c.find_elements_by_css_selector('.v-card')) - old_card_count,
+            lambda c: len(c.find_elements_by_css_selector('.v-card')) > old_card_count,
             message='Could not detect any change in history catalog'
         )
-        assert card_brought > 0, 'Elements expected to increase; what have you done?'
+        assert card_brought, 'Elements expected to increase; what have you done?'
 
 
 class PredictPageTest(PageLayoutTestMixin):
@@ -226,7 +226,7 @@ class PredictPageTest(PageLayoutTestMixin):
         result_sign = self.browser.find_element_by_id('result-sign')
         old_text = result_sign.text
         is_changed = Wait(result_sign, 10).until(
-            lambda e: e.text != old_text,
+            lambda e: 'OK' in e.text,
             message='Status feedback not changing'
         )
         assert is_changed

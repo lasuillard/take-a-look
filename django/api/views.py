@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from core.models import History
+from core import util
 from .serializers import PredictSerializer, HistorySerializer
 
 
@@ -29,17 +30,16 @@ class ModelView(ViewSet):
     available query options:
     - none: none
     """
-    data = json.load(open('ml-models.json'))
 
     def retrieve(self, request, pk):
-        for item in self.data:
+        for item in util.model_meta:
             if item.get('kind') == pk:
                 return Response(item['instance'], status=status.HTTP_200_OK)
 
         return Response({}, status=status.HTTP_404_NOT_FOUND)
 
     def list(self, request):
-        items = [item.get('instance') for item in self.data]
+        items = [item.get('instance') for item in util.model_meta]
         return Response({'results': items}, status=status.HTTP_200_OK)
 
 
@@ -68,10 +68,11 @@ class HistoryView(ListModelMixin, RetrieveModelMixin, CreateModelMixin, GenericV
         query = self.request.query_params
         model = query.get('model')
         if model and isinstance(model, str):
-            queryset.filter(model=model)
+            queryset = queryset.filter(model=model)
 
         return queryset
 
     def perform_create(self, serializer):
-        # do prediction things
-        serializer.save(prediction='dog')
+        arg = self.request.data
+        prediction = util.predict(arg['img'], model=arg['model'])
+        serializer.save(prediction=prediction)
