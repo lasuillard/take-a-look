@@ -18,21 +18,21 @@
                   <v-form id="prediction-form" class="px-3 py-1">
                     <v-file-input 
                       id="upload-image"
-                      v-model="form.image"
+                      v-model="form.img"
                       accept="image/*"
                       label="Image input"
                     ></v-file-input>
                     <v-select
                       id="select-label"
                       v-model="form.label"
-                      :items="['Cat', 'Dog']"
+                      :items="['cat', 'dog']"
                       prepend-icon="mdi-label"
                       label="Label of image"
                     ></v-select>
                     <v-select
                       id="select-model"
                       v-model="form.model"
-                      :items="['SVM', 'CNN']"
+                      :items="['svm', 'cnn']"
                       prepend-icon="mdi-graph"
                       hide-details
                       single-line
@@ -53,20 +53,20 @@
             <v-col cols="12" lg="6">
               <v-card :loading="loading">
                 <v-card-title>Result</v-card-title>
-                <v-card-text>Status: <span id="result-sign">{{ result.status }}</span></v-card-text>
+                <v-card-text>Status: <span id="result-sign">{{ status }}</span></v-card-text>
                 <v-card-text>
-                  <p class="subtitle-1">&dash; Request (TEMPORARY)</p>
+                  <p class="subtitle-1">&dash; Request Body</p>
                   <div 
                     v-for="key in Object.keys(form)" 
-                    :key="key"
+                    :key="'rq-' + key"
                     class="body-2 pl-3 mb-3"
                     >{{ key }}: {{ form[key] }}<br/>
                   </div>
 
-                  <p class="subtitle-1">&dash; Response (TEMPORARY)</p>
+                  <p class="subtitle-1">&dash; Response Data</p>
                   <div 
                     v-for="key in Object.keys(result)" 
-                    :key="key"
+                    :key="'rs-' + key"
                     class="body-2 pl-3 mb-3"
                     >{{ key }}: {{ result[key] }}<br/>
                   </div>
@@ -92,27 +92,34 @@
         },
         // request
         form: {
-          image: null,
+          img: null,
           label: null,
           model: null
         },
         // response
         loading: false,
-        result: {
-          status: 'Ready',
-          id: null,
-          prediction: null,
-        }
+        status: 'Ready',
+        result: {}
       }),
       methods: {
         predict () {
           this.loading = true
-          setTimeout(() => {
+          let data = new FormData()
+          for (var key in this.form) {
+            data.append(key, this.form[key])
+          }
+          axios.post('/api/history/', data, { 
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            }
+          }).then(response => {
+            this.status = 'OK'
+            this.result = response.data
+          }).catch(error => {
+            this.status = 'ERROR'
+          }).finally(() => {
             this.loading = false
-            this.result.status = 'OK'
-            this.result.id = 3
-            this.result.prediction = 'Dog'
-          }, 4000)
+          })
         }
       }
     })

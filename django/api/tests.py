@@ -55,15 +55,16 @@ class APITest:
         items = response.data['results']
         assert isinstance(items, list) and len(items) > 0
 
-    def test_post_predict_image(self, client, live_server):
+    def test_post_predict_image(self):
         # user request for prediction with data: image file, label of it, prediction model
+        fp = open('C:/Users/dldbc/Downloads/sample_image.jpg', mode='rb')
         data = {
-            'image': open('C:/Users/dldbc/Downloads/sample_image.jpg', mode='rb'),
-            'label': random.choice(History.CLASSES),
-            'model': random.choice(History.SUPPORTED_MODELS),
+            'img': fp,
+            'label': 'cat',
+            'model': 'svm',
         }
-        response = self.client.post(self.server_url + '/api/predict/', data=data)
-        assert response.status_code == status.HTTP_201_CREATED
+        response = self.client.post(self.server_url + '/api/history/', data=data)
+        assert response.status_code == status.HTTP_201_CREATED, response.data
 
     def test_get_history_items(self):
         # get response and check it well came

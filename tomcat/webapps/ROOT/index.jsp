@@ -29,11 +29,10 @@
                 hide-delimiters
               >
                 <v-carousel-item
-                  v-for="(item, i) in carousel.items"
-                  id="recent-submit-1"
+                  v-for="(img, i) in carousel.images"
+                  :id="'recent-submit-' + i"
                   :key="i"
-                  :src="item.src"
-                  link :href="item.link"
+                  :src="img"
                 ></v-carousel-item>
               </v-carousel>
             </v-col>
@@ -42,19 +41,11 @@
             <v-col cols="11" lg="8">
               <p class="font-weight-thin display-1 white--text">Models we provide:</p>
               <v-expansion-panels id="model-previews" inset>
-                <v-expansion-panel id="model-1">
-                  <v-expansion-panel-header>SVM (Support Vector Machine)</v-expansion-panel-header>
-                  <v-expansion-panel-content id="model-1-content">
+                <v-expansion-panel v-for="(model, i) in models" :key="i" :id="'model-' + i">
+                  <v-expansion-panel-header>{{ model.aka.toUpperCase() }} ({{ model.name }})</v-expansion-panel-header>
+                  <v-expansion-panel-content :id="'model-' + i + '-content'">
                     <v-container>
-                      Oh, some saying
-                    </v-container>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-                <v-expansion-panel id="model-2">
-                  <v-expansion-panel-header>CNN (Convolutional Neural Network)</v-expansion-panel-header>
-                  <v-expansion-panel-content id="model-2-content">
-                    <v-container>
-                      Oh, some saying
+                      {{ model.intro }}
                     </v-container>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
@@ -78,22 +69,19 @@
           context: 'index'
         },
         carousel: {
-          items: [
-            {
-              src: 'https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg',
-            },
-            {
-              src: 'https://cdn.vuetifyjs.com/images/carousel/sky.jpg',
-            },
-            {
-              src: 'https://cdn.vuetifyjs.com/images/carousel/bird.jpg',
-            },
-            {
-              src: 'https://cdn.vuetifyjs.com/images/carousel/planet.jpg',
-            },
-          ]
-        }
+          images: []
+        },
+        models: []
       }),
+      async created () {
+        // carousel images
+        var response = await axios.get('/api/history/')
+        this.carousel.images = response.data.results.map(i => i.img)
+
+        // model previews
+        var response = await axios.get('/api/model/')
+        this.models = response.data.results
+      }
     })
   </script>
 </html>

@@ -10,6 +10,5 @@ router.register(r'history', views.HistoryView, basename='history')
 
 urlpatterns = [
     path('ping/', views.ping_pong),
-    path('predict/', views.predict),
     path('', include(router.urls))
 ]

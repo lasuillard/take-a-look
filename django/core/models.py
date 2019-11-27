@@ -13,12 +13,12 @@ def _get_image_uuid4(instance, filename):
 
 class History(models.Model):
     CLASSES = (
-        (0, 'Dog'),
-        (1, 'Cat'),
+        ('dog', 'dog'),
+        ('cat', 'cat'),
     )
     SUPPORTED_MODELS = (
-        (0, 'svm'),
-        (1, 'cnn')
+        ('svm', 'svm'),
+        ('cnn', 'cnn')
     )
 
     id = models.AutoField(primary_key=True)

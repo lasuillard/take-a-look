@@ -16,26 +16,26 @@
               <p class="mt-4 ml-1">Our models trained in python 3.x using Keras 2.2.4-tf with TensorFlow 1.15.0 and Scikit-learn 0.21.3. below is the detail of each model.</p>
               <v-card class="mt-6" flat tile>
                 <v-tabs vertical>
-                  <v-tab>SVM</v-tab>
-                  <v-tab-item>
-                    <v-card flat class="mt-2">
-                      <v-card-text>
-                        <div>
-                          <p class="display-1">Support Vector Machine</p>
-                          <p class="title">- Description</p>
-                          <div class="body-2 pl-3 mb-3">
-                            &nbsp;Classification model trained by sklearn.svm.SVC, take input as features extracted by VGG19 pre-trained layers.<br/>
-                            its accuracy took about 83% in test.
-                          </div>
+                    <v-tab v-for="(model, i) in models" :key="i">{{ model.aka.toUpperCase() }}</v-tab>
+                    <v-tab-item v-for="(model, i) in models" :key="i">
+                      <v-card flat class="mt-2">
+                        <v-card-text>
+                          <div>
+                            <p class="display-1">{{ model.name }}</p>
+                            <p class="title">- Description</p>
+                            <div class="body-2 pl-3 mb-3">
+                              {{ model.desc }}
+                            </div>
 
-                          <p class="title">- Visualization</p>
-                          <div class="body-2 pl-3 mb-3">
-                            -
+                            <p class="title">- Visualization</p>
+                            <div class="body-2 pl-3 mb-3">
+                              -
+                            </div>
                           </div>
-                        </div>
-                      </v-card-text>
-                    </v-card>
-                  </v-tab-item>
+                        </v-card-text>
+                      </v-card>
+                    </v-tab-item>
+                  </template>
                 </v-tabs>
               </v-card>
             </v-col>
@@ -57,10 +57,10 @@
               :key="card.id"
               cols="12" sm="6" md="4" lg="3"
             >
-              <v-card>
+              <v-card :id="'history-' + card.id">
                 <v-img
                   class="white--text align-end"
-                  :src="card.src"
+                  :src="card.img"
                   gradient="to bottom, rgba(0, 0, 0, .1), rgba(0, 0, 0, .5)"
                   height="200px"
                 >
@@ -91,18 +91,6 @@
             </v-col>
           </v-row>
         </v-container>
-        <v-dialog v-model="dialog.open" scrollable max-width="600px">
-          <v-card id="history-dialog">
-            <v-card-title class="headline">{{ 'History for #' + dialog.id }}</v-card-title>
-            <v-card-text>
-              Blahblah
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn id="close-dialog" color="red lighten-1" text @click="dialog.open = false">Close</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
       </v-content>
       <%@ include file="/WEB-INF/jsp/components/appbar.jsp" %>
       <%@ include file="/WEB-INF/jsp/components/bottom-nav-bar.jsp" %>
@@ -119,17 +107,11 @@
         },
         // model
         tab: 'SVM',
-        models: [
-          { name: 'SVM', text: 'Support Vector Machine' },
-          { name: 'CNN', text: 'ConvNet' },
-          { name: 'Decision Tree', text: 'Decision Tree Model'}
-        ],
+        models: [],
         // history
+        next: '/api/history/',
         last: false,
-        cards: [
-          { id: 1, src: 'https://cdn.vuetifyjs.com/images/cards/house.jpg', model: 'svm', prediction: 'cat', label: 'dog' },
-          { id: 2, src: 'https://cdn.vuetifyjs.com/images/cards/road.jpg', model: 'cnn', prediction: 'dog', label: 'dog' },
-        ],
+        cards: [],
         // dialogs
         dialog: {
           open: false,
@@ -144,12 +126,22 @@
           //
           this.dialog.open = true
         },
-        viewMore () {
+        async viewMore () {
           if (!this.last) {
-            this.cards.push({ id: 3, src: 'https://cdn.vuetifyjs.com/images/cards/plane.jpg', model: 'decision tree', prediction: 'cat', label: 'cat' })
-            this.last = true
+            var response = await axios.get(this.next)
+            this.cards = this.cards.concat(response.data.results)
+            this.next = response.data.next
+            this.last = (this.next == null)
           }
         }
+      },
+      async created () {
+        // load model metadata
+        var response = await axios.get('/api/model/')
+        this.models = response.data.results
+
+        // load history
+        await this.viewMore()
       }
     })
   </script>

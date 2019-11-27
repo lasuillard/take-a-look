@@ -3,14 +3,13 @@
 
 """
 import json
-import random
 from rest_framework.viewsets import ViewSet, GenericViewSet
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from core.models import History
-from .serializers import HistorySerializer
+from .serializers import PredictSerializer, HistorySerializer
 
 
 @api_view(['GET'])
@@ -21,33 +20,6 @@ def ping_pong(request):
     this view, 'ping' is made for purpose of health-check of backend API server.
     """
     return Response({'ping': 'pong!'}, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-def predict(request):
-    """
-    Process machine-learning processing for request
-    """
-    data = request.data
-    image = data['image']
-    model = data['model']
-
-    # run prediction with machine learning
-    if model == 'svm':
-        prediction = 0
-    elif model == 'cnn':
-        prediction = 1
-    else:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    history = History.objects.create(
-        img=image,
-        label=data['label'],
-        model=model,
-        prediction=prediction
-    )
-    return Response(HistorySerializer(history, context={'request': request}).data,
-                    status=status.HTTP_201_CREATED)
 
 
 class ModelView(ViewSet):
@@ -78,10 +50,15 @@ class HistoryView(ListModelMixin, RetrieveModelMixin, CreateModelMixin, GenericV
     available query options:
     - model: string, filter histories with prediction model used
     """
-    serializer_class = HistorySerializer
+
+    def get_serializer_class(self):
+        if self.action in ('retrieve', 'list'):
+            return HistorySerializer
+
+        return PredictSerializer
 
     def get_queryset(self):
-        queryset = History.objects.all()
+        queryset = History.objects.order_by('-id')
 
         # queries are applied only for list action
         if self.action != 'list':
@@ -94,3 +71,7 @@ class HistoryView(ListModelMixin, RetrieveModelMixin, CreateModelMixin, GenericV
             queryset.filter(model=model)
 
         return queryset
+
+    def perform_create(self, serializer):
+        # do prediction things
+        serializer.save(prediction='dog')
