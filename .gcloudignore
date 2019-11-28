@@ -1,0 +1,6 @@
+django/venv
+django/staticfiles
+django/media
+logs
+*.log
+config

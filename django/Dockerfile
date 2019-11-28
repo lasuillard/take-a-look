@@ -16,11 +16,9 @@ RUN pip install -r requirements.txt --default-timeout=100
 ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /
 RUN ["chmod", "u+x", "/wait-for-it.sh"]
 
-# collect statics and update database
-ONBUILD RUN python manage.py collectstatic --no-input && \
-            python manage.py makemigrations
+# make migration files
+ONBUILD RUN python manage.py makemigrations
 
 # TODO: migrations should be performed only one time for all pods
 CMD /wait-for-it.sh svc-db:5432 -t 10 && \
-    python manage.py migrate && \
     gunicorn --bind 0.0.0.0:8000 core.wsgi
