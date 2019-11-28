@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: takealook
+  name: job-setup
+  labels:
+    app: main
+spec:
+  template:
+    spec:
+      volumes:
+        - name: v-http
+          persistentVolumeClaim:
+            claimName: pvc-nfs
+      containers:
+      - name: container-django
+        image: gcr.io/take-a-look-257807/backend-django:init
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: v-http
+            mountPath: /django/staticfiles
+            subPath: static
+        envFrom:
+          - configMapRef:
+              name: cfg-api
+        env:
+          - name: DJANGO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: secret
+                key: backend.django.secret
+          - name: DATABASE_URL
+            valueFrom:  
+              secretKeyRef:
+                name: secret
+                key: backend.django.database.url
+        command: ["/bin/bash", "-c", "python manage.py collectstatic --noinput && python manage.py migrate"]
+      restartPolicy: Never
+  backoffLimit: 3

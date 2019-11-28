@@ -2,26 +2,34 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: takealook
-  name: deployment-main-blue
+  name: dp-revprx-blue
+  labels:
+    app: main
+    component: revprx
+    color: blue
 spec:
   replicas: 3
   selector:
     matchLabels:
       app: main
+      component: revprx
       color: blue
   template:
     metadata:
       namespace: takealook
       labels:
         app: main
+        component: revprx
         color: blue
     spec:
       volumes:
-        - name: http-static
-          emptyDir: {}
+        - name: v-http
+          persistentVolumeClaim:
+            claimName: pvc-nfs
       containers:
-        - name: container-nginx
-          image: takealook.azurecr.io/gateway-nginx:init
+        - name: cnt-revprx
+          image: gcr.io/take-a-look-257807/gateway-nginx:init
+          imagePullPolicy: Always
           resources:
             limits:
               cpu: 100m
@@ -29,26 +37,67 @@ spec:
           ports:
             - containerPort: 80
           volumeMounts:
-            - name: http-static
+            # shared static files
+            - name: v-http
+              subPath: static
               mountPath: /var/www/http/static
+              readOnly: yes
+            # shared media files
+            - name: v-http
+              subPath: media
+              mountPath: /var/www/http/media
+              readOnly: yes
           envFrom:
             - configMapRef:
-              name: config-gateway
-
-        - name: container-django
-          image: takealook.azurecr.io/backend-django:init
+                name: cfg-revprx
+                
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: takealook
+  name: dp-api-blue
+  labels:
+    app: main
+    component: api
+    color: blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: main
+      component: api
+      color: blue
+  template:
+    metadata:
+      namespace: takealook
+      labels:
+        app: main
+        component: api
+        color: blue
+    spec:
+      volumes:
+        - name: v-http
+          persistentVolumeClaim:
+            claimName: pvc-nfs
+      containers:
+        - name: cnt-api
+          image: gcr.io/take-a-look-257807/backend-django:init
+          imagePullPolicy: Always
           resources:
             limits:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 300m
+              memory: 1Gi
           ports:
             - containerPort: 8000
           volumeMounts:
-            - name: http-static
-              mountPath: /django/staticfiles
+            # writable shared media directory for service
+            - name: v-http
+              subPath: media
+              mountPath: /django/media
           envFrom:
             - configMapRef:
-              name: config-backend
+                name: cfg-api
           env:
             - name: DJANGO_SECRET_KEY
               valueFrom:
@@ -60,13 +109,36 @@ spec:
                 secretKeyRef:
                   name: secret
                   key: backend.django.database.url
-          lifecycle:
-            postStart:
-              exec:
-                command: ["/bin/sh", "-c", "python manage.py collectstatic --no-input"]
-                
-        - name: container-tomcat
-          image: takealook.azurecr.io/frontend-tomcat:init
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: takealook
+  name: dp-rs-blue
+  labels:
+    app: main
+    component: jspvue
+    color: blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: main
+      component: jspvue
+      color: blue
+  template:
+    metadata:
+      namespace: takealook
+      labels:
+        app: main
+        component: jspvue
+        color: blue
+    spec:
+      containers:
+        - name: cnt-jspvue
+          image: gcr.io/take-a-look-257807/frontend-tomcat:init
+          imagePullPolicy: Always
           resources:
             limits:
               cpu: 100m

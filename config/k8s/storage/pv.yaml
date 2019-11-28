@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: takealook
+  name: pv-nfs
+  labels:
+    app: storage
+spec:
+  storageClassName: nfs
+  capacity:
+    storage: 1T
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 10.231.60.138  # Google Cloud Filestore
+    path: "/data"

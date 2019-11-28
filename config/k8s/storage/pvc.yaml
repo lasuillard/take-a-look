@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: takealook
+  name: pvc-nfs
+  labels:
+    app: storage
+spec:
+  storageClassName: nfs
+  resources:
+    requests:
+      storage: 5G
+  accessModes:
+    - ReadWriteMany

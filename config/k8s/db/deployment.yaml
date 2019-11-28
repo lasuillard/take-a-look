@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: takealook
-  name: deployment-postgres
+  name: dp-db
 spec:
   replicas: 1
   selector:
@@ -14,19 +14,27 @@ spec:
       labels:
         app: db
     spec:
+      volumes:
+        - name: v-postgres
+          persistentVolumeClaim:
+            claimName: pvc-nfs
       containers:
-        - name: container-postgres
+        - name: cnt-postgres
           image: postgres:11.5-alpine
           ports:
-          - containerPort: 5432
+            - containerPort: 5432
+          volumeMounts:
+            - name: v-postgres
+              subPath: postgres
+              mountPath: /var/lib/postgresql/data
           env:
-          - name: POSTGRES_DB
-            value: takealook
-          - name: POSTGRES_USER
-            value: tal
-          - name: POSTGRES_PASSWORD
-            value: g7152fa
+            - name: POSTGRES_DB
+              value: takealook
+            - name: POSTGRES_USER
+              value: tal
+            - name: POSTGRES_PASSWORD
+              value: g7152fa
           resources:
             limits:
-              cpu: 700m
-              memory: 512Mi
+              cpu: 500m
+              memory: 256Mi
