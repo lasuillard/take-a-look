@@ -9,8 +9,8 @@
   <body>
     <v-app id="app">
       <v-parallax 
-        src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
-        style="position: absolute; top: 50vh; right: 0; width: 100%; height: 60vh; z-index: 0;"
+        src="/static/ai-parallax.jpg"
+        style="position: absolute; top: 60vh; right: 0; width: 100%; height: 50vh; z-index: 0;"
       ></v-parallax>
       <v-content style="z-index: 1;">
         <v-container fluid>
@@ -52,7 +52,7 @@
               </v-expansion-panels>
             </v-col>
           </v-row>
-          <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+          <div style="height: 10vh;"></div>
         </v-container>
       </v-content>
       <%@ include file="/WEB-INF/jsp/components/appbar.jsp" %>
@@ -69,7 +69,7 @@
           context: 'index'
         },
         carousel: {
-          images: []
+          images: ['/static/kaggle-dogs-vs-cats.jpg', ]  // default image
         },
         models: []
       }),

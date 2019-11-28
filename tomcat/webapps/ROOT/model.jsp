@@ -26,10 +26,13 @@
                             <div class="body-2 pl-3 mb-3">
                               {{ model.desc }}
                             </div>
-
                             <p class="title">- Visualization</p>
                             <div class="body-2 pl-3 mb-3">
-                              -
+                              <v-img 
+                                v-for="(view, j) in model.visualizations" :key="j"
+                                :src="view"
+                                contain max-height="250px"
+                              ></v-img>
                             </div>
                           </div>
                         </v-card-text>
@@ -67,8 +70,8 @@
                   <v-card-title>{{ '#' + card.id }}</v-card-title>
                 </v-img>
                 <v-card-text>
-                  <div class="mb-1"><strong>Model : </strong>{{ card.model }}</div>
-                  <div><strong>Prediction / Label : </strong>{{ card.prediction }} / {{ card.label }}</div>
+                  <div class="mb-1"><strong>Model : </strong>{{ card.model.toUpperCase() }}</div>
+                  <div><strong>Prediction / Label : </strong>{{ nameLabel(card.prediction) }} / {{ nameLabel(card.label) }}</div>
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
@@ -109,22 +112,18 @@
         tab: 'SVM',
         models: [],
         // history
+        labels: [],
         next: '/api/history/',
         last: false,
         cards: [],
-        // dialogs
-        dialog: {
-          open: false,
-          id: null,
-        },
       }),
       methods: {
-        openDialog (id) {
-          this.dialog.id = id
-          //
-          // do ajax thing
-          //
-          this.dialog.open = true
+        nameLabel (value) {
+          var match = this.labels.find(i => i.value == value)
+          if (match)
+            return match.display_name
+            
+          return 'Unknown'
         },
         async viewMore () {
           if (!this.last) {
@@ -136,6 +135,9 @@
         }
       },
       async created () {
+        var option = await axios.options('/api/history/')
+        this.labels = option.data.actions.POST.label.choices
+
         // load model metadata
         var response = await axios.get('/api/model/')
         this.models = response.data.results
