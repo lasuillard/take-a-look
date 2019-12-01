@@ -6,17 +6,17 @@
     "instance": {
       "aka": "svm",
       "name": "Support Vector Machine",
-      "intro": "svm intro",
-      "desc": "svm desc",
+      "intro": "Classifier model provided by scikit-learn, using features extracted by keras VGG19.",
+      "desc": "Our SVM model is trained with two library - keras and scikit-learn. with trained VGG19 feature extraction layer we pull features out from image and put it into sklearn.svm.SVC to classify image.",
       "metrics": {
-        "accuracy": 0.83,
-        "precision": null,
-        "recall": null,
-        "f1-score": null
+        "accuracy": 0.9420,
+        "precision": 0.9429,
+        "recall": 0.9425,
+        "f1-score": 0.9420
       },
       "visualizations": {
-        "graph": "/static/svm-graph.png",
-        "graph-sv": "/static/svm-graph-sv.png"
+        "graph": "/static/svm-visualization.png",
+        "graph-sv": "/static/svm-visualization-sv.png"
       }
     }
   },
@@ -27,16 +27,16 @@
     "instance": {
       "aka": "dt",
       "name": "Decision Tree",
-      "intro": "dt intro",
-      "desc": "dt desc",
+      "intro": "Classifier model provided by scikit-learn. using features extracted by VGG19 pre-trained CNN model.",
+      "desc": "Like SVM model we provide, it uses same libraries(keras and scikit-learn). it almost work same like SVM but just using sklearn.tree.DecisionTreeClassifier for classification.",
       "metrics": {
-        "accuracy": 0.85,
-        "precision": null,
-        "recall": null,
-        "f1-score": null
+        "accuracy": 0.9430,
+        "precision": 0.9457,
+        "recall": 0.9427,
+        "f1-score": 0.9429
       },
       "visualizations": {
-        "tree": "/static/dt-tree.png"
+        "tree": "/static/dt-visualization.png"
       }
     }
   },
@@ -46,16 +46,21 @@
     "instance": {
       "aka": "cnn",
       "name": "Convolutional Neural Network",
-      "intro": "cnn intro",
-      "desc": "cnn desc",
+      "intro": "CNN model trained with keras (tensorflow backend). microtuned VGG19 pre-trained model",
+      "desc": "Simple and enough powerful for this binary classification model. using VGG19 pre-trained model feature extraction layer. microtuned whole 'block 5' layer for dataset.",
       "metrics": {
-        "accuracy": 0.95,
-        "precision": null,
-        "recall": null,
-        "f1-score": null
+        "loss": 0.1452,
+        "accuracy": 0.9505,
+        "precision": 0.9537,
+        "recall": 0.9458,
+        "f1-score": 0.9472
       },
       "visualizations": {
-        "graph-fit": "/static/cnn-graph-fit.png"
+        "graph-loss": "/static/cnnp-graph-loss.png",
+        "graph-acc": "/static/cnnp-graph-acc.png",
+        "graph-precision": "/static/cnnp-graph-precision.png",
+        "graph-recall": "/static/cnnp-graph-recall.png",
+        "graph-f1score": "/static/cnnp-graph-f1score.png"        
       }
     }
   }
