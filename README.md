@@ -19,7 +19,11 @@ Main feature is classifying given picture whether it is dog or cat, by trained m
     - URLs above will also be handled here with proxy
 
 #### Staging & Production (k8s)
-- RESERVED
+- Database: PostgreSQL with Cloud Filestore
+- Others: not that different from local environment but some of them are not exposed
+
+#### Secrets and ML Model Dumps
+These items are not included in repository for security or due to size limit. retrieve it directly from owner.
 
 
 ## Installation
