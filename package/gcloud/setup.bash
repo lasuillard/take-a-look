@@ -1,5 +1,5 @@
 export GCP_PROJECT_ID=take-a-look-257807
-export GKE_CLUSTER_NAME=takealook-gke-cluster
+export GKE_CLUSTER_NAME=gke-cluster
 export GCP_FILESTORE_INSTANCE_NAME=nfs-server
 
 # prerequisites

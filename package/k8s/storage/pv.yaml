@@ -12,5 +12,5 @@ spec:
   accessModes:
     - ReadWriteMany
   nfs:
-    server: 10.231.60.138  # Google Cloud Filestore
+    server: 10.43.145.98  # Google Cloud Filestore
     path: "/data"
