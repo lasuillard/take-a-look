@@ -73,12 +73,6 @@
                   <div class="mb-1"><strong>Model : </strong>{{ card.model.toUpperCase() }}</div>
                   <div><strong>Prediction / Label : </strong>{{ nameLabel(card.prediction) }} / {{ nameLabel(card.label) }}</div>
                 </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn icon @click="openDialog(card.id)">
-                    <v-icon>mdi-file-document</v-icon>
-                  </v-btn>
-                </v-card-actions>
               </v-card>
             </v-col>
           </v-row>
@@ -109,7 +103,7 @@
           context: 'model'
         },
         // model
-        tab: 'SVM',
+        tab: 'SVM',  // init tab
         models: [],
         // history
         labels: [],

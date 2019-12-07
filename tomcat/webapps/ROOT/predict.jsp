@@ -93,23 +93,24 @@
         meta: {
           context: 'predict'
         },
-        // request
+        // page meta & status data
         labels: [],
         models: [],
+        status: 'Ready',  // no state machine for it, just for display
+        loading: false,
+        // request
         form: {
           img: null,
           label: null,
           model: null
         },
         // response
-        loading: false,
-        status: 'Ready',
         result: {}
       }),
       methods: {
         predict () {
           this.loading = true
-          let data = new FormData()
+          let data = new FormData()  // for image data transfer
           for (var key in this.form) {
             data.append(key, this.form[key])
           }
